@@ -1,0 +1,7 @@
+[workspace]
+
+members = [
+  "blastmud_listener",
+  "blastmud_interfaces",
+  "blastmud_game",
+]
