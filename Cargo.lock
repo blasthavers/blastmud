@@ -56,7 +56,9 @@ dependencies = [
  "tokio",
  "tokio-postgres",
  "tokio-serde",
+ "tokio-stream",
  "tokio-util",
+ "uuid",
 ]
 
 [[package]]

@@ -16,4 +16,6 @@ simple_logger = "4.0.0"
 tokio = { version = "1.23.0", features = ["signal", "net", "macros", "rt-multi-thread", "rt", "tokio-macros", "time", "sync", "io-util"] }
 tokio-postgres = { version = "0.7.7", features = ["with-uuid-1"] }
 tokio-serde = { version = "0.8.0", features = ["serde", "serde_cbor", "cbor"] }
+tokio-stream = "0.1.11"
 tokio-util = { version = "0.7.4", features = ["codec"] }
+uuid = { version = "1.2.2", features = ["v4", "serde", "rng"] }

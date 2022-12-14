@@ -99,9 +99,13 @@ where
                             );
                             break 'full_select;
                         }
+                        Ok(Some(MessageToListener::AcknowledgeMessage)) => {
+                            // We do this here to ensure we never ack an ack.
+                            warn!("Unexpected AcknowledgeMessage from gameserver. This suggests a bug in the gameserver");
+                        }
                         Ok(Some(msg)) => {
                             message_handler(msg);
-                        }   
+                        }
                     }
                     
                     match conn_framed.send(MessageFromListener::AcknowledgeMessage).await {
@@ -208,9 +212,7 @@ type SessionMap = Arc<Mutex<BTreeMap<Uuid, SessionRecord>>>;
 
 async fn handle_server_message(session_map: SessionMap, message: MessageToListener) {
     match message {
-        MessageToListener::AcknowledgeMessage => {
-            warn!("Unexpected AcknowledgeMessage from gameserver. This suggests a bug in the gameserver");
-        }
+        MessageToListener::AcknowledgeMessage => {}
         MessageToListener::DisconnectSession { session } => {
             match session_map.lock().await.get(&session) {
                 // Just silently ignore it if they are disconnected.

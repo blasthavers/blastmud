@@ -3,9 +3,11 @@ use std::fs;
 use std::error::Error;
 use log::{info, LevelFilter};
 use simple_logger::SimpleLogger;
+use tokio::signal::unix::{signal, SignalKind};
 
 mod db;
 mod listener;
+mod message_handler;
 
 #[derive(Deserialize, Debug)]
 struct Config {
@@ -31,7 +33,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     info!("Database pool initialised: {:?}", pool.status());
 
-    let listener = listener::start_listener(config.listener);
+    let listener_map = listener::make_listener_map();
+    listener::start_listener(config.listener, listener_map.clone(),
+                             move |msg| {
+                                 message_handler::handle(msg, pool.clone(), listener_map.clone())
+                             }
+    ).await?;
+
+
+    let mut sigusr1 = signal(SignalKind::user_defined1())?;
+    sigusr1.recv().await;
     
     Ok(())
 }
