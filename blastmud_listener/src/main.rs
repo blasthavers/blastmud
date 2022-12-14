@@ -19,6 +19,7 @@ use tokio_util::codec::length_delimited::LengthDelimitedCodec;
 use tokio_serde::formats::Cbor;
 use futures::prelude::*;
 use uuid::Uuid;
+use tokio_stream::wrappers::ReceiverStream;
 
 #[derive(Deserialize, Debug)]
 struct Config {
@@ -39,7 +40,8 @@ enum ServerTaskCommand {
 
 fn run_server_task<FHandler, HandlerFut>(
     unfinished_business: Option<MessageFromListener>,
-    mut receiver: mpsc::Receiver<ServerTaskCommand>,
+    listener_id: Uuid,
+    mut receiver: ReceiverStream<ServerTaskCommand>,
     sender: mpsc::Sender<ServerTaskCommand>,
     server: String,
     message_handler: FHandler
@@ -61,17 +63,13 @@ where
             Cbor::<MessageToListener, MessageFromListener>::default()
         );
 
-        for req in unfinished_business {
-            match conn_framed.send(req).await {
-                Ok(_) => {}
-                Err(e) => {
-                    warn!("Can't re-send acknowledgement to {}: {}. Dropping message", server, e);
-                    // After a re-failure, we don't retry a further time.
-                    run_server_task(None, receiver, sender, server, message_handler);
-                    return;
-                }
-            }
-        }
+        let mut commands = stream::iter(vec!(
+            ServerTaskCommand::Send {
+                message: MessageFromListener::ListenerPing { uuid: listener_id }
+            })
+        ).chain(
+            stream::iter(unfinished_business.map(|message| ServerTaskCommand::Send { message }))
+        ).chain(&mut receiver);
         
         'full_select: loop {
             tokio::select!(
@@ -81,6 +79,7 @@ where
                             warn!("Got read error from {}: {}", server, e);
                             run_server_task(
                                 None,
+                                listener_id,
                                 receiver,
                                 sender,
                                 server,
@@ -92,6 +91,7 @@ where
                             warn!("Got connection closed from {}", server);
                             run_server_task(
                                 None,
+                                listener_id,
                                 receiver,
                                 sender,
                                 server,
@@ -108,12 +108,13 @@ where
                         Ok(_) => {}
                         Err(e) => {
                             warn!("Can't send acknowledgement to {}: {}", server, e);
-                            run_server_task(None, receiver, sender, server, message_handler);
+                            run_server_task(None, listener_id, receiver, sender, server,
+                                            message_handler);
                             break 'full_select;
                         }
                     }
                 },
-                Some(req) = receiver.recv() => {
+                Some(req) = commands.next() => {
                     match req {
                         ServerTaskCommand::Send { message } =>
                             match conn_framed.send(message.clone()).await {
@@ -127,6 +128,7 @@ where
                                                 warn!("Can't read acknowledgement from {}: {}", server, e);
                                                 run_server_task(
                                                     Some(message),
+                                                    listener_id,
                                                     receiver,
                                                     sender,
                                                     server,
@@ -138,6 +140,7 @@ where
                                                 warn!("Got connection closed from {}", server);
                                                 run_server_task(
                                                     Some(message),
+                                                    listener_id,
                                                     receiver,
                                                     sender,
                                                     server,
@@ -158,6 +161,7 @@ where
                                     warn!("Can't send message to {}: {}", server, e);
                                     run_server_task(
                                         Some(message),
+                                        listener_id,
                                         receiver,
                                         sender,
                                         server,
@@ -173,6 +177,7 @@ where
                             info!("Ending connection to server {} due to reload", server);
                             run_server_task(
                                 None,
+                                listener_id,
                                 receiver,
                                 sender,
                                 new_server,
@@ -233,9 +238,12 @@ async fn handle_server_message(session_map: SessionMap, message: MessageToListen
     }
 }
 
-fn start_server_task(server: String, session_map: SessionMap) -> mpsc::Sender<ServerTaskCommand> {
+fn start_server_task(listener_id: Uuid,
+                     server: String,
+                     session_map: SessionMap) -> mpsc::Sender<ServerTaskCommand> {
     let (sender, receiver) = mpsc::channel(20);
-    run_server_task(None, receiver, sender.clone(), server,
+    let receiver_stream = ReceiverStream::new(receiver);
+    run_server_task(None, listener_id, receiver_stream, sender.clone(), server,
                     move |msg| handle_server_message(session_map.clone(),
                                               msg) );
     sender
@@ -318,14 +326,28 @@ async fn handle_client_socket(
     active_sessions.lock().await.remove(&session);
 }
 
+fn start_pinger(listener: Uuid, server: mpsc::Sender<ServerTaskCommand>) {
+    task::spawn(async move {
+        loop {
+            time::sleep(Duration::from_secs(60)).await;
+            server.send(ServerTaskCommand::Send {
+                message: MessageFromListener::ListenerPing { uuid: listener }
+            }).await.unwrap();
+        }
+    });
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     SimpleLogger::new().init().unwrap();
 
+    let listener_id = Uuid::new_v4();
     let mut config = read_latest_config()?;
     let active_sessions: SessionMap =
         Arc::new(Mutex::new(BTreeMap::new()));
-    let server_sender = start_server_task(config.gameserver, active_sessions.clone());
+    let server_sender = start_server_task(listener_id, config.gameserver, active_sessions.clone());
+
+    start_pinger(listener_id, server_sender.clone());
     
     let mut sighups = signal(SignalKind::hangup())?;
       

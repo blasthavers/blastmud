@@ -16,3 +16,16 @@ Blastmud consists of the following main components:
 # Status
 
 Blastmud is not yet playable, it is under development.
+
+# Schema management
+We only keep the latest version in version control, and use migra (pip3 install migra) to identify changes between
+the production schema and the latest in code.
+
+The latest schema is under `schema`.
+
+Create a user with a secret password, and username `blast`. Create a production database called `blast`.
+
+To get to the latest schema:
+* Run `psql <schema/schema.sql` to create the temporary `blast_schemaonly` database.
+* Run `migra "postgres:///blast" "postgres:///blast_schemaonly" > /tmp/update.sql`
+* Check `/tmp/update.sql` and if it looks good, apply it with `psql -d blast </tmp/update.sql`
