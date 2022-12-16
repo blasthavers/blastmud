@@ -8,6 +8,7 @@ use tokio::signal::unix::{signal, SignalKind};
 mod db;
 mod listener;
 mod message_handler;
+mod version_cutover;
 
 #[derive(Deserialize, Debug)]
 struct Config {
@@ -35,11 +36,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let listener_map = listener::make_listener_map();
     listener::start_listener(config.listener, listener_map.clone(),
-                             move |msg| {
-                                 message_handler::handle(msg, pool.clone(), listener_map.clone())
+                             move |listener_id, msg| {
+                                 message_handler::handle(listener_id, msg, pool.clone(), listener_map.clone())
                              }
     ).await?;
 
+    version_cutover::replace_old_gameserver(&config.pidfile)?;
 
     let mut sigusr1 = signal(SignalKind::user_defined1())?;
     sigusr1.recv().await;

@@ -10,6 +10,7 @@ blastmud_interfaces = { path = "../blastmud_interfaces" }
 deadpool-postgres = { version = "0.10.3", features = ["serde"] }
 futures = "0.3.25"
 log = "0.4.17"
+nix = "0.26.1"
 serde = { version = "1.0.150", features = ["derive", "serde_derive"] }
 serde_yaml = "0.9.14"
 simple_logger = "4.0.0"

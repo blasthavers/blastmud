@@ -10,7 +10,7 @@ use tokio::net::{TcpStream, TcpListener};
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::sync::{mpsc, Mutex};
 use tokio::io::{BufReader, AsyncWriteExt};
-use log::{warn, info};
+use log::{warn, info, LevelFilter};
 use simple_logger::SimpleLogger;
 use std::sync::Arc;
 use blastmud_interfaces::*;
@@ -48,7 +48,7 @@ fn run_server_task<FHandler, HandlerFut>(
 )
 where
     FHandler: Fn(MessageToListener) -> HandlerFut + Send + 'static,
-    HandlerFut: Future<Output = ()>
+    HandlerFut: Future<Output = ()> + Send + 'static
 {
     task::spawn(async move {
         let conn = loop {
@@ -104,17 +104,18 @@ where
                             warn!("Unexpected AcknowledgeMessage from gameserver. This suggests a bug in the gameserver");
                         }
                         Ok(Some(msg)) => {
-                            message_handler(msg);
-                        }
-                    }
+                            let mhfut = message_handler(msg);
+                            mhfut.await;
                     
-                    match conn_framed.send(MessageFromListener::AcknowledgeMessage).await {
-                        Ok(_) => {}
-                        Err(e) => {
-                            warn!("Can't send acknowledgement to {}: {}", server, e);
-                            run_server_task(None, listener_id, receiver, sender, server,
-                                            message_handler);
-                            break 'full_select;
+                            match conn_framed.send(MessageFromListener::AcknowledgeMessage).await {
+                                Ok(_) => {}
+                                Err(e) => {
+                                    warn!("Can't send acknowledgement to {}: {}", server, e);
+                                    run_server_task(None, listener_id, receiver, sender, server,
+                                                    message_handler);
+                                    break 'full_select;
+                                }
+                            }
                         }
                     }
                 },
@@ -156,7 +157,8 @@ where
                                                 break 'wait_for_ack;
                                             }
                                             Ok(Some(msg)) => {
-                                                message_handler(msg);
+                                                let mhfut = message_handler(msg);
+                                                mhfut.await;
                                             }
                                         }
                                     }
@@ -294,7 +296,7 @@ async fn handle_client_socket(
                         break 'client_loop;
                     }
                     SessionCommand::SendString { message } =>
-                        match wstream.write_all((message + "\r\n").as_bytes()).await {
+                        match wstream.write_all(message.as_bytes()).await {
                             Err(e) => {
                                 info!("Client connection {} got error {}", session, e);
                             }
@@ -341,7 +343,7 @@ fn start_pinger(listener: Uuid, server: mpsc::Sender<ServerTaskCommand>) {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    SimpleLogger::new().init().unwrap();
+    SimpleLogger::new().with_level(LevelFilter::Info).init().unwrap();
 
     let listener_id = Uuid::new_v4();
     let mut config = read_latest_config()?;

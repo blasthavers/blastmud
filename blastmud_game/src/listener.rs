@@ -1,6 +1,6 @@
 use std::error::Error;
 use tokio::task;
-use tokio::net::{TcpStream, TcpListener};
+use tokio::net::{TcpSocket, TcpStream, lookup_host};
 use log::{info, warn};
 use tokio_util::codec;
 use tokio_util::codec::length_delimited::LengthDelimitedCodec;
@@ -8,13 +8,15 @@ use tokio_serde::formats::Cbor;
 use blastmud_interfaces::*;
 use futures::prelude::*;
 use tokio::sync::{Mutex, mpsc, oneshot};
+use std::net::SocketAddr;
 use std::sync::Arc;
 use uuid::Uuid;
 use std::collections::BTreeMap;
 
+#[derive(Debug)]
 pub struct ListenerSend {
-    message: MessageToListener,
-    ack_notify: oneshot::Sender<()>
+    pub message: MessageToListener,
+    pub ack_notify: oneshot::Sender<()>
 }
 pub type ListenerMap = Arc<Mutex<BTreeMap<Uuid, mpsc::Sender<ListenerSend>>>>;
     
@@ -23,15 +25,24 @@ async fn handle_from_listener<FHandler, HandlerFut>(
     message_handler: FHandler,
     listener_map: ListenerMap)
 where
-    FHandler: Fn(MessageFromListener) -> HandlerFut + Send + 'static,
-    HandlerFut: Future<Output = ()> + Send + 'static {
+    FHandler: Fn(Uuid, MessageFromListener) -> HandlerFut + Send + 'static,
+    HandlerFut: Future<Output = Result<(), Box<dyn Error>>> + Send + 'static {
     let mut conn_framed = tokio_serde::Framed::new(
         codec::Framed::new(conn, LengthDelimitedCodec::new()),
         Cbor::<MessageFromListener, MessageToListener>::default()
     );
 
-    let session = match conn_framed.try_next().await {
-        Ok(Some(MessageFromListener::ListenerPing { uuid })) => uuid,
+    let listener_id = match conn_framed.try_next().await {
+        Ok(Some(ref msg@MessageFromListener::ListenerPing { uuid })) => {
+            let handle_fut = message_handler(uuid.clone(), msg.clone());
+            match handle_fut.await {
+                Ok(_) => {}
+                Err(e) => {
+                    warn!("Error processing initial ListenerPing: {}", e);
+                }
+            };
+            uuid
+        },
         Ok(Some(msg)) => {
             warn!("Got non-ping first message from listener: {:?}", msg);
             return;
@@ -55,7 +66,7 @@ where
     }
     
     let (sender, mut receiver) = mpsc::channel(1);
-    listener_map.lock().await.insert(session, sender);
+    listener_map.lock().await.insert(listener_id, sender);
     
     'listener_loop: loop {
         tokio::select!(
@@ -65,8 +76,17 @@ where
                         warn!("Unexpected acknowledge from listener - bug in listener?");
                     }
                     Ok(Some(msg)) => {
-                        let handle_fut = message_handler(msg);
-                        handle_fut.await;
+                        let handle_fut = message_handler(listener_id, msg);
+                        match handle_fut.await {
+                            Ok(_) => {}
+                            Err(e) => {
+                                // On the assumption errors that get here are bad enough that they are a
+                                // problem with the system rather than the message, so we want to log and
+                                // retry later.
+                                warn!("Error from message handler - closing listener connection: {}", e);
+                                break 'listener_loop;
+                            }
+                        }
                         match conn_framed.send(
                             MessageToListener::AcknowledgeMessage
                         ).await {
@@ -79,12 +99,12 @@ where
                     }
                     Ok(None) => {
                         warn!("Lost connection to listener {} due to end-of-stream",
-                              session);
+                              listener_id);
                         break 'listener_loop;
                     }
                     Err(e) => {
                         warn!("Lost connection to listener {} due to error {}",
-                              session, e);
+                              listener_id, e);
                         break 'listener_loop;
                     }
                 }
@@ -105,8 +125,18 @@ where
                             break 'ack_wait_loop;
                         }
                         Ok(Some(msg)) => {
-                            let handle_fut = message_handler(msg);
-                            handle_fut.await;
+                            let handle_fut = message_handler(listener_id, msg);
+                            match handle_fut.await {
+                                Ok(_) => {}
+                                Err(e) => {
+                                    // On the assumption errors that get here are bad enough that they are a
+                                    // problem with the system rather than the message, so we want to log and
+                                    // retry later.
+                                    warn!("Error from message handler - closing listener connection: {}", e);
+                                    break 'listener_loop;
+                                }
+                            }
+
                             match conn_framed.send(
                                 MessageToListener::AcknowledgeMessage
                             ).await {
@@ -119,12 +149,12 @@ where
                         }
                         Ok(None) => {
                             warn!("Lost connection to listener {} due to end-of-stream",
-                                  session);
+                                  listener_id);
                             break 'listener_loop;
                         }
                         Err(e) => {
                             warn!("Lost connection to listener {} due to error {}",
-                                  session, e);
+                                  listener_id, e);
                             break 'listener_loop;
                         }
                     }
@@ -133,7 +163,7 @@ where
         );
     }
 
-    listener_map.lock().await.remove(&session);
+    listener_map.lock().await.remove(&listener_id);
 }
 
 pub fn make_listener_map() -> ListenerMap {
@@ -146,12 +176,20 @@ pub async fn start_listener<FHandler, HandlerFut>(
     handle_message: FHandler
 ) -> Result<(), Box<dyn Error>>
 where
-    FHandler: Fn(MessageFromListener) -> HandlerFut + Send + Clone + 'static,
-    HandlerFut: Future<Output = ()> + Send + 'static
+    FHandler: Fn(Uuid, MessageFromListener) -> HandlerFut + Send + Clone + 'static,
+    HandlerFut: Future<Output = Result<(), Box<dyn Error>>> + Send + 'static
 {
     info!("Starting listener on {}", bind_to);
-    let listener = TcpListener::bind(bind_to).await?;
-
+    let addr = lookup_host(bind_to).await?.next().expect("listener address didn't resolve");
+    let socket = match addr {
+        SocketAddr::V4 {..} => TcpSocket::new_v4()?,
+        SocketAddr::V6 {..} => TcpSocket::new_v6()?
+    };
+    socket.set_reuseaddr(true)?;
+    socket.set_reuseport(true)?;
+    socket.bind(addr)?;
+    let listener = socket.listen(5)?;
+    
     let listener_map_for_task = listener_map.clone();
     task::spawn(async move {
         loop {
