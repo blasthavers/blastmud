@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use std::fs;
 use std::error::Error;
-use log::{info, LevelFilter};
+use log::{info, error, LevelFilter};
 use simple_logger::SimpleLogger;
 use tokio::signal::unix::{signal, SignalKind};
 
@@ -9,6 +9,7 @@ mod db;
 mod listener;
 mod message_handler;
 mod version_cutover;
+mod av;
 
 #[derive(Deserialize, Debug)]
 struct Config {
@@ -26,6 +27,10 @@ fn read_latest_config() -> Result<Config, Box<dyn Error>> {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     SimpleLogger::new().with_level(LevelFilter::Info).init().unwrap();
 
+    av::check().or_else(|e| -> Result<(), Box<dyn Error>> {
+        error!("Couldn't verify age-verification.yml - this is not a complete game. Check README.md: {}", e);
+        Err(e)
+    })?;
     let config = read_latest_config()?;
     let pool = db::start_pool(&config.database_conn_string)?;
 

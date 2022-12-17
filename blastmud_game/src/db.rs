@@ -2,7 +2,12 @@ use tokio_postgres::config::Config as PgConfig;
 use deadpool_postgres::{Manager, ManagerConfig, Pool, RecyclingMethod};
 use std::error::Error;
 use std::str::FromStr;
+use uuid::Uuid;
 use tokio_postgres::NoTls;
+
+pub async fn record_listener_ping(_listener: Uuid, _pool: Pool) {
+    // pool.get().await?.query("");
+}
 
 pub fn start_pool(connstr: &str) -> Result<Pool, Box<dyn Error>> {
     let mgr_config = ManagerConfig {
