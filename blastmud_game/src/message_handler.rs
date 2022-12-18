@@ -1,16 +1,16 @@
 use blastmud_interfaces::*;
-use deadpool_postgres::Pool;
 use crate::listener::ListenerMap;
+use crate::db;
 use MessageFromListener::*;
 use uuid::Uuid;
 use tokio::{sync::oneshot, task};
 use crate::listener::ListenerSend;
-use std::error::Error;
+use crate::DResult;
 
-pub async fn handle(listener: Uuid, msg: MessageFromListener, _pool: Pool, listener_map: ListenerMap)
-  -> Result<(), Box<dyn Error>> {
+pub async fn handle(listener: Uuid, msg: MessageFromListener, pool: db::DBPool, listener_map: ListenerMap)
+                    -> DResult<()> {
     match msg {
-        ListenerPing { uuid: _ } => {}
+        ListenerPing { .. } => { db::record_listener_ping(listener, pool).await?; }
         SessionConnected { session: _, source: _ } => {}
         SessionDisconnected { session: _ } => {}
         SessionSentLine { session, msg } => {

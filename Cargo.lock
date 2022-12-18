@@ -54,6 +54,7 @@ version = "0.1.0"
 dependencies = [
  "base64 0.20.0",
  "blastmud_interfaces",
+ "deadpool",
  "deadpool-postgres",
  "futures",
  "log",

@@ -4,6 +4,7 @@ use serde::Deserialize;
 use ring::signature;
 use base64;
 use log::info;
+use crate::DResult;
 
 #[derive(Deserialize)]
 struct AV {
@@ -22,12 +23,12 @@ static KEY_BYTES: [u8;65] = [
     0xa8, 0xb3, 0x02, 0x35, 0x7e
 ];
 
-pub fn check() -> Result<(), Box<dyn Error>> {
+pub fn check() -> DResult<()> {
     let av: AV = serde_yaml::from_str(&fs::read_to_string("age-verification.yml")?).
-        map_err(|error| Box::new(error) as Box<dyn Error>)?;
+        map_err(|error| Box::new(error) as Box<dyn Error + Send + Sync>)?;
     if av.copyright != "This file is protected by copyright and may not be used or reproduced except as authorised by the copyright holder. All rights reserved." ||
         av.assertion != "age>=18" {
-            Err(Box::<dyn Error>::from("Invalid age-verification.yml"))?;
+            Err(Box::<dyn Error + Send + Sync>::from("Invalid age-verification.yml"))?;
         }
 
     let sign_text = format!("cn={};{};serial={}", av.cn, av.assertion, av.serial);
@@ -35,5 +36,5 @@ pub fn check() -> Result<(), Box<dyn Error>> {
         signature::UnparsedPublicKey::new(&signature::ECDSA_P256_SHA256_ASN1, &KEY_BYTES);
     info!("Checking sign_text: {}", sign_text);
     key.verify(&sign_text.as_bytes(), &base64::decode(av.sig)?)
-        .map_err(|e| Box::<dyn Error>::from(format!("Invalid age-verification.yml signature: {}", e)))
+        .map_err(|_| Box::<dyn Error + Send + Sync>::from("Invalid age-verification.yml signature"))
 }

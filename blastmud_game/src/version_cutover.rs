@@ -3,8 +3,9 @@ use std::path::Path;
 use std::error::Error;
 use log::info;
 use nix::{sys::signal::{kill, Signal}, unistd::Pid};
+use crate::DResult;
 
-pub fn replace_old_gameserver(pidfile: &str) -> Result<(), Box<dyn Error>> {
+pub fn replace_old_gameserver(pidfile: &str) -> DResult<()> {
     match read_to_string(pidfile) {
         Err(e) =>
             if e.kind() == std::io::ErrorKind::NotFound {
@@ -12,16 +13,16 @@ pub fn replace_old_gameserver(pidfile: &str) -> Result<(), Box<dyn Error>> {
                 Ok(())
             } else {  
                 info!("Error reading pidfile (other than NotFound): {}", e);
-                Err(Box::new(e) as Box::<dyn Error>)
+                Err(Box::new(e) as Box::<dyn Error + Send + Sync>)
             }
         Ok(f) => {
-            let pid: Pid = Pid::from_raw(f.parse().map_err(|e| Box::new(e) as Box::<dyn Error>)?);
+            let pid: Pid = Pid::from_raw(f.parse().map_err(|e| Box::new(e) as Box::<dyn Error + Send + Sync>)?);
             match read_to_string(format!("/proc/{}/cmdline", pid)) {
                 Ok(content) =>
                     if content.contains("blastmud_game") {
                         info!("pid in pidfile references blastmud_game; starting cutover");
                         kill(pid, Signal::SIGUSR1)
-                            .map_err(|e| Box::new(e) as Box<dyn Error>)
+                            .map_err(|e| Box::new(e) as Box<dyn Error + Send + Sync>)
                     } else {
                         info!("Pid in pidfile is for process not including blastmud_game - ignoring pidfile");
                         Ok(())
@@ -35,5 +36,5 @@ pub fn replace_old_gameserver(pidfile: &str) -> Result<(), Box<dyn Error>> {
     }?;
     info!("Writing new pidfile");
     write(Path::new(pidfile), format!("{}", std::process::id()))
-        .map_err(|e| Box::new(e) as Box::<dyn Error>)
+        .map_err(|e| Box::new(e) as Box::<dyn Error + Send + Sync>)
 }

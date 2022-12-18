@@ -63,4 +63,4 @@ Create a user with a secret password, and username `blast`. Create a production 
 To get to the latest schema:
 * Run `psql <schema/schema.sql` to create the temporary `blast_schemaonly` database.
 * Run `migra "postgres:///blast" "postgres:///blast_schemaonly" > /tmp/update.sql`
-* Check `/tmp/update.sql` and if it looks good, apply it with `psql -d blast </tmp/update.sql`
+* Check `/tmp/update.sql` and if it looks good, apply it with `psql -u blast -d blast </tmp/update.sql`

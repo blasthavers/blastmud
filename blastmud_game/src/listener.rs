@@ -1,5 +1,4 @@
-use std::error::Error;
-use tokio::task;
+use tokio::{task, time};
 use tokio::net::{TcpSocket, TcpStream, lookup_host};
 use log::{info, warn};
 use tokio_util::codec;
@@ -12,6 +11,7 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use uuid::Uuid;
 use std::collections::BTreeMap;
+use crate::DResult;
 
 #[derive(Debug)]
 pub struct ListenerSend {
@@ -26,7 +26,7 @@ async fn handle_from_listener<FHandler, HandlerFut>(
     listener_map: ListenerMap)
 where
     FHandler: Fn(Uuid, MessageFromListener) -> HandlerFut + Send + 'static,
-    HandlerFut: Future<Output = Result<(), Box<dyn Error>>> + Send + 'static {
+    HandlerFut: Future<Output = DResult<()>> + Send + 'static {
     let mut conn_framed = tokio_serde::Framed::new(
         codec::Framed::new(conn, LengthDelimitedCodec::new()),
         Cbor::<MessageFromListener, MessageToListener>::default()
@@ -163,6 +163,8 @@ where
         );
     }
 
+    // We delay to avoid wasting resources if we do end up in a loop.
+    time::sleep(time::Duration::from_secs(1)).await;    
     listener_map.lock().await.remove(&listener_id);
 }
 
@@ -174,10 +176,10 @@ pub async fn start_listener<FHandler, HandlerFut>(
     bind_to: String,
     listener_map: ListenerMap,
     handle_message: FHandler
-) -> Result<(), Box<dyn Error>>
+) -> DResult<()>
 where
     FHandler: Fn(Uuid, MessageFromListener) -> HandlerFut + Send + Clone + 'static,
-    HandlerFut: Future<Output = Result<(), Box<dyn Error>>> + Send + 'static
+    HandlerFut: Future<Output = DResult<()>> + Send + 'static
 {
     info!("Starting listener on {}", bind_to);
     let addr = lookup_host(bind_to).await?.next().expect("listener address didn't resolve");
