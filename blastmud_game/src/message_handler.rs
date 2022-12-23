@@ -3,6 +3,7 @@ use crate::db;
 use MessageFromListener::*;
 use uuid::Uuid;
 use crate::DResult;
+use ansi_macro::ansi;
 
 #[derive(Clone,Debug)]
 pub struct ListenerSession {
@@ -22,7 +23,7 @@ pub async fn handle(listener: Uuid, msg: MessageFromListener, pool: db::DBPool)
         }
         SessionSentLine { session, msg } => {
             pool.queue_for_session(&ListenerSession { listener, session },
-                                   &format!("You hear an echo saying: \x1b[31m{}\x1b[0m\r\n", msg)).await?;
+                                   &format!(ansi!("You hear an echo saying: <bggreen><red>{}<reset>\r\n"), msg)).await?;
         }
         AcknowledgeMessage => {}
     }
