@@ -3,7 +3,6 @@ use std::error::Error;
 use serde::Deserialize;
 use ring::signature;
 use base64;
-use log::info;
 use crate::DResult;
 
 #[derive(Deserialize)]
@@ -34,7 +33,6 @@ pub fn check() -> DResult<()> {
     let sign_text = format!("cn={};{};serial={}", av.cn, av.assertion, av.serial);
     let key: signature::UnparsedPublicKey<&[u8]> =
         signature::UnparsedPublicKey::new(&signature::ECDSA_P256_SHA256_ASN1, &KEY_BYTES);
-    info!("Checking sign_text: {}", sign_text);
     key.verify(&sign_text.as_bytes(), &base64::decode(av.sig)?)
         .map_err(|_| Box::<dyn Error + Send + Sync>::from("Invalid age-verification.yml signature"))
 }

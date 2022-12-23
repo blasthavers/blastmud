@@ -6,6 +6,7 @@ use uuid::Uuid;
 use tokio::{sync::oneshot, task};
 use crate::listener::ListenerSend;
 use crate::DResult;
+use log::info;
 
 pub async fn handle(listener: Uuid, msg: MessageFromListener, pool: db::DBPool, listener_map: ListenerMap)
                     -> DResult<()> {
@@ -14,20 +15,27 @@ pub async fn handle(listener: Uuid, msg: MessageFromListener, pool: db::DBPool, 
         SessionConnected { session: _, source: _ } => {}
         SessionDisconnected { session: _ } => {}
         SessionSentLine { session, msg } => {
+            info!("Awaiting listener lock");
             let lmlock = listener_map.lock().await;
             let opt_sender = lmlock.get(&listener).map(|v| v.clone());
             drop(lmlock);
+            info!("Listener lock dropped");
             match opt_sender {
                 None => {}
                 Some(sender) => {
+                    info!("Spawning message task");
                     task::spawn(async move {
                         let (tx, rx) = oneshot::channel();
+                        info!("Sending echo");
                         sender.send(ListenerSend { message: MessageToListener::SendToSession {
                             session,
                             msg: format!("You hear an echo saying: \x1b[31m{}\x1b[0m\r\n", msg) },
                                                    ack_notify: tx }).await.unwrap_or(());
+                        info!("Awaiting echo ack");
                         rx.await.unwrap_or(());
+                        info!("Echo ack received");
                     });
+                    info!("Message task spawned");
                 }
             }
         }

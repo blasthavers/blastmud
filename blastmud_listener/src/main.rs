@@ -6,7 +6,7 @@ use std::fs;
 use serde::*;
 use tokio::task;
 use tokio::time::{self, Duration};
-use tokio::net::{TcpStream, TcpListener};
+use tokio::net::{TcpStream, TcpListener, lookup_host};
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::sync::{mpsc, Mutex};
 use tokio::io::{BufReader, AsyncWriteExt};
@@ -20,16 +20,22 @@ use tokio_serde::formats::Cbor;
 use futures::prelude::*;
 use uuid::Uuid;
 use tokio_stream::wrappers::ReceiverStream;
+use warp;
+use warp::filters::ws;
+use warp::Filter;
 
 #[derive(Deserialize, Debug)]
 struct Config {
     listeners: Vec<String>,
+    ws_listener: String,
     gameserver: String,
 }
 
-fn read_latest_config() -> Result<Config, Box<dyn std::error::Error>> {
+type DResult<A> = Result<A, Box<dyn Error + Send + Sync>>;
+
+fn read_latest_config() -> DResult<Config> {
     serde_yaml::from_str(&fs::read_to_string("listener.conf")?).
-        map_err(|error| Box::new(error) as Box<dyn Error>)
+        map_err(|error| Box::new(error) as Box<dyn Error + Send + Sync>)
 }
 
 #[derive(Debug, Clone)]
@@ -159,7 +165,18 @@ where
                                             Ok(Some(msg)) => {
                                                 let mhfut = message_handler(msg);
                                                 mhfut.await;
+                                                
+                                                match conn_framed.send(MessageFromListener::AcknowledgeMessage).await {
+                                                    Ok(_) => {}
+                                                    Err(e) => {
+                                                        warn!("Can't send acknowledgement to {}: {}", server, e);
+                                                        run_server_task(None, listener_id, receiver, sender, server,
+                                                                        message_handler);
+                                                        break 'full_select;
+                                                    }
+                                                }
                                             }
+                                            
                                         }
                                     }
                                 }
@@ -316,7 +333,7 @@ async fn handle_client_socket(
                     }
                     Ok(Some(msg)) => {
                         server.send(ServerTaskCommand::Send {
-                            message: MessageFromListener::SessionSentLine { session, msg }
+                            message: MessageFromListener::SessionSentLine {session, msg }
                         }).await.unwrap();
                     }
                 }
@@ -341,8 +358,125 @@ fn start_pinger(listener: Uuid, server: mpsc::Sender<ServerTaskCommand>) {
     });
 }
 
+async fn handle_websocket(
+    mut ws: ws::WebSocket,
+    src: String,
+    active_sessions: SessionMap,
+    server: mpsc::Sender<ServerTaskCommand>
+) {
+    let session = Uuid::new_v4();
+    info!("Accepted websocket session {} with forwarded-for {}", session, src);
+
+    let (lsender, mut lreceiver) = mpsc::channel(MAX_CAPACITY);
+    let (discon_sender, mut discon_receiver) = mpsc::unbounded_channel();
+    
+    active_sessions.lock().await.insert(
+        session, SessionRecord {
+            channel: lsender.clone(),
+            disconnect_channel: discon_sender.clone()
+        });
+    server.send(ServerTaskCommand::Send { message: MessageFromListener::SessionConnected {
+        session, source: src
+    }}).await.unwrap();
+    
+    'client_loop: loop {
+        tokio::select!(
+            Some(()) = discon_receiver.recv() => {
+                info!("Client connection {} instructed for immediate disconnect", session);
+                break 'client_loop;
+            }
+            Some(message) = lreceiver.recv() => {
+                match message {
+                    SessionCommand::Disconnect => {
+                        info!("Client connection {} instructed for disconnect", session);
+                        break 'client_loop;
+                    }
+                    SessionCommand::SendString { message } =>
+                        match ws.send(ws::Message::text(message)).await {
+                            Err(e) => {
+                                info!("Client connection {} got error {}", session, e);
+                            }
+                            Ok(()) => {}
+                        }
+                }
+            },
+            msg_read = ws.try_next(), if lsender.capacity() > STOP_READING_CAPACITY  => {
+                match msg_read {
+                    Err(e) => {
+                        info!("Client connection {} got error {}", session, e);
+                        break 'client_loop;
+                    }
+                    Ok(None) => {
+                        info!("Client connection {} closed", session);
+                        break 'client_loop;
+                    }
+                    Ok(Some(msg)) if msg.is_close() => {
+                        info!("Client connection {} got WS close message", session);
+                        break 'client_loop;
+                    }
+                    Ok(Some(wsmsg)) if wsmsg.is_text() => {
+                        match wsmsg.to_str() {
+                            Err(_) => {}
+                            Ok(msg) => {
+                                server.send(ServerTaskCommand::Send {
+                                    message: MessageFromListener::SessionSentLine {
+                                        session,
+                                        msg: msg.to_owned()
+                                    }
+                                }).await.unwrap_or(());
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            },
+            _ = time::sleep(time::Duration::from_secs(60)) => {
+                match ws.send(ws::Message::ping([])).await {
+                    Err(e) => {
+                        info!("Client connection {} got error {}", session, e);
+                    }
+                    Ok(()) => {}
+                }
+            }
+        );
+    }
+
+    server.send(ServerTaskCommand::Send { message: MessageFromListener::SessionDisconnected {
+        session
+    }}).await.unwrap();
+    active_sessions.lock().await.remove(&session);
+}
+
+async fn upgrade_websocket(src: String, wsreq: ws::Ws,
+                           active_sessions: SessionMap,
+                           server_sender: mpsc::Sender<ServerTaskCommand>) ->
+    Result<impl warp::Reply, warp::Rejection> {
+        Ok(
+            wsreq.on_upgrade(|wss| handle_websocket(
+                wss, src, active_sessions,
+                server_sender))
+        )
+}
+
+async fn start_websocket(bind: String, active_sessions: SessionMap, server_sender: mpsc::Sender<ServerTaskCommand>) -> DResult<()> {
+    let sockaddr = lookup_host(bind).await?.next().expect("Can't resolve websocket bind name");
+    let routes =
+        warp::get()
+        .and(warp::path("wsgame"))
+        .and(warp::header("X-Forwarded-For"))
+        .and(ws::ws())
+        .and_then(move |src, wsreq| upgrade_websocket(src, wsreq, active_sessions.clone(), server_sender.clone()));
+
+    task::spawn(
+        warp::serve(
+            routes
+        ).run(sockaddr)
+    );
+    Ok(())
+}
+
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     SimpleLogger::new().with_level(LevelFilter::Info).init().unwrap();
 
     let listener_id = Uuid::new_v4();
@@ -352,6 +486,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let server_sender = start_server_task(listener_id, config.gameserver, active_sessions.clone());
 
     start_pinger(listener_id, server_sender.clone());
+    // Note: for now, this cannot be reconfigured without a complete restart.
+    start_websocket(config.ws_listener, active_sessions.clone(), server_sender.clone()).await?;
     
     let mut sighups = signal(SignalKind::hangup())?;
       

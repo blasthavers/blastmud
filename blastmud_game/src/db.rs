@@ -24,7 +24,7 @@ pub async fn record_listener_ping(listener: Uuid, pool: DBPool) -> DResult<()> {
 pub async fn get_dead_listeners(pool: DBPool) -> DResult<Vec<Uuid>> {
     Ok(get_conn(pool).await?
         .query("SELECT listener FROM listeners WHERE last_seen < NOW() - \
-                INTERVAL 2 minutes", &[])
+                INTERVAL '2 minutes'", &[])
        .await?.into_iter().map(|r| r.get(0)).collect())
 }
 
