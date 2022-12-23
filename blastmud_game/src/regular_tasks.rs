@@ -4,8 +4,8 @@ use crate::db;
 use log::warn;
 
 async fn cleanup_session_once(pool: db::DBPool) -> DResult<()> {
-    for listener in db::get_dead_listeners(pool.clone()).await? {
-        db::cleanup_listener(pool.clone(), listener).await?;
+    for listener in pool.clone().get_dead_listeners().await? {
+        pool.clone().cleanup_listener(listener).await?;
     }
     Ok(())
 }

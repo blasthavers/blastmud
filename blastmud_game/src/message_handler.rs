@@ -11,8 +11,10 @@ use log::info;
 pub async fn handle(listener: Uuid, msg: MessageFromListener, pool: db::DBPool, listener_map: ListenerMap)
                     -> DResult<()> {
     match msg {
-        ListenerPing { .. } => { db::record_listener_ping(listener, pool).await?; }
-        SessionConnected { session: _, source: _ } => {}
+        ListenerPing { .. } => { pool.record_listener_ping(listener).await?; }
+        SessionConnected { session, source: _ } => {
+            pool.start_session(listener, session).await?;
+        }
         SessionDisconnected { session: _ } => {}
         SessionSentLine { session, msg } => {
             info!("Awaiting listener lock");

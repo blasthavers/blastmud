@@ -4,6 +4,7 @@ use std::error::Error;
 use log::{info, error, LevelFilter};
 use simple_logger::SimpleLogger;
 use tokio::signal::unix::{signal, SignalKind};
+use db::DBPool;
 
 mod db;
 mod listener;
@@ -35,10 +36,10 @@ async fn main() -> DResult<()> {
         Err(e)
     })?;
     let config = read_latest_config()?;
-    let pool = db::start_pool(&config.database_conn_string)?;
+    let pool = DBPool::start(&config.database_conn_string)?;
 
     // Test the database connection string works so we quit early if not...
-    let _ = db::get_conn(pool.clone()).await?.query("SELECT 1", &[]).await?;
+    let _ = pool.clone().get_conn().await?.query("SELECT 1", &[]).await?;
 
     info!("Database pool initialised");
 
