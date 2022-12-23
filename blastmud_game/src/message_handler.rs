@@ -1,45 +1,28 @@
 use blastmud_interfaces::*;
-use crate::listener::ListenerMap;
 use crate::db;
 use MessageFromListener::*;
 use uuid::Uuid;
-use tokio::{sync::oneshot, task};
-use crate::listener::ListenerSend;
 use crate::DResult;
-use log::info;
 
-pub async fn handle(listener: Uuid, msg: MessageFromListener, pool: db::DBPool, listener_map: ListenerMap)
+#[derive(Clone,Debug)]
+pub struct ListenerSession {
+    pub listener: Uuid,
+    pub session: Uuid
+}
+
+pub async fn handle(listener: Uuid, msg: MessageFromListener, pool: db::DBPool)
                     -> DResult<()> {
     match msg {
         ListenerPing { .. } => { pool.record_listener_ping(listener).await?; }
         SessionConnected { session, source: _ } => {
-            pool.start_session(listener, session).await?;
+            pool.start_session(ListenerSession { listener, session }).await?;
         }
-        SessionDisconnected { session: _ } => {}
+        SessionDisconnected { session } => {
+            pool.end_session(ListenerSession { listener, session }).await?;
+        }
         SessionSentLine { session, msg } => {
-            info!("Awaiting listener lock");
-            let lmlock = listener_map.lock().await;
-            let opt_sender = lmlock.get(&listener).map(|v| v.clone());
-            drop(lmlock);
-            info!("Listener lock dropped");
-            match opt_sender {
-                None => {}
-                Some(sender) => {
-                    info!("Spawning message task");
-                    task::spawn(async move {
-                        let (tx, rx) = oneshot::channel();
-                        info!("Sending echo");
-                        sender.send(ListenerSend { message: MessageToListener::SendToSession {
-                            session,
-                            msg: format!("You hear an echo saying: \x1b[31m{}\x1b[0m\r\n", msg) },
-                                                   ack_notify: tx }).await.unwrap_or(());
-                        info!("Awaiting echo ack");
-                        rx.await.unwrap_or(());
-                        info!("Echo ack received");
-                    });
-                    info!("Message task spawned");
-                }
-            }
+            pool.queue_for_session(&ListenerSession { listener, session },
+                                   &format!("You hear an echo saying: \x1b[31m{}\x1b[0m\r\n", msg)).await?;
         }
         AcknowledgeMessage => {}
     }

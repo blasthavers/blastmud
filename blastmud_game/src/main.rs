@@ -48,12 +48,12 @@ async fn main() -> DResult<()> {
     let mh_pool = pool.clone();
     listener::start_listener(config.listener, listener_map.clone(),
                              move |listener_id, msg| {
-                                 message_handler::handle(listener_id, msg, mh_pool.clone(), listener_map.clone())
+                                 message_handler::handle(listener_id, msg, mh_pool.clone())
                              }
     ).await?;
 
     version_cutover::replace_old_gameserver(&config.pidfile)?;
-    regular_tasks::start_regular_tasks(pool.clone())?;
+    regular_tasks::start_regular_tasks(pool.clone(), listener_map)?;
     
     let mut sigusr1 = signal(SignalKind::user_defined1())?;
     sigusr1.recv().await;

@@ -19,7 +19,7 @@ pub struct ListenerSend {
     pub ack_notify: oneshot::Sender<()>
 }
 pub type ListenerMap = Arc<Mutex<BTreeMap<Uuid, mpsc::Sender<ListenerSend>>>>;
-    
+
 async fn handle_from_listener<FHandler, HandlerFut>(
     conn: TcpStream,
     message_handler: FHandler,

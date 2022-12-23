@@ -37,7 +37,7 @@ CREATE TABLE users (
 CREATE INDEX user_by_listener ON users(current_listener);
 
 CREATE UNLOGGED TABLE sendqueue (
-  item BIGINT NOT NULL PRIMARY KEY,
+  item BIGSERIAL NOT NULL PRIMARY KEY,
   session UUID NOT NULL REFERENCES sessions(session),
   listener UUID REFERENCES listeners(listener),
   message TEXT NOT NULL
