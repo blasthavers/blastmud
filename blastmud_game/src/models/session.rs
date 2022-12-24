@@ -1,0 +1,15 @@
+use serde::{Serialize, Deserialize};
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Session {
+    pub source: String,
+    pub less_explicit_mode: bool,
+    // Reminder: Consider backwards compatibility when updating this. New fields should generally
+    //           be an Option, or things will crash out for existing sessions.
+}
+
+impl Default for Session {
+    fn default() -> Self {
+        Session { source: "unknown".to_owned(), less_explicit_mode: false }
+    }
+}

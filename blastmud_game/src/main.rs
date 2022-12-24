@@ -12,6 +12,7 @@ mod message_handler;
 mod version_cutover;
 mod av;
 mod regular_tasks;
+mod models;
 
 pub type DResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
 
@@ -39,7 +40,7 @@ async fn main() -> DResult<()> {
     let pool = DBPool::start(&config.database_conn_string)?;
 
     // Test the database connection string works so we quit early if not...
-    let _ = pool.clone().get_conn().await?.query("SELECT 1", &[]).await?;
+    let _ = pool.get_conn().await?.query("SELECT 1", &[]).await?;
 
     info!("Database pool initialised");
 
@@ -53,7 +54,7 @@ async fn main() -> DResult<()> {
     ).await?;
 
     version_cutover::replace_old_gameserver(&config.pidfile)?;
-    regular_tasks::start_regular_tasks(pool.clone(), listener_map)?;
+    regular_tasks::start_regular_tasks(&pool, listener_map)?;
     
     let mut sigusr1 = signal(SignalKind::user_defined1())?;
     sigusr1.recv().await;

@@ -18,13 +18,14 @@ pub async fn handle(listener: Uuid, msg: MessageFromListener, pool: db::DBPool)
     match msg {
         ListenerPing { .. } => { pool.record_listener_ping(listener).await?; }
         SessionConnected { session, source } => {
-            new_session::handle(&ListenerSession { listener, session }, &source, pool).await?;
+            new_session::handle(
+                &ListenerSession { listener, session }, source, &pool).await?;
         }
         SessionDisconnected { session } => {
             pool.end_session(ListenerSession { listener, session }).await?;
         }
         SessionSentLine { session, msg } => {
-            user_commands::handle(&ListenerSession { listener, session }, &msg, pool).await?;
+            user_commands::handle(&ListenerSession { listener, session }, &msg, &pool).await?;
         }
         AcknowledgeMessage => {}
     }

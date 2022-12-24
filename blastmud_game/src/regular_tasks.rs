@@ -6,8 +6,8 @@ use blastmud_interfaces::MessageToListener;
 use log::warn;
 
 async fn cleanup_session_once(pool: db::DBPool) -> DResult<()> {
-    for listener in pool.clone().get_dead_listeners().await? {
-        pool.clone().cleanup_listener(listener).await?;
+    for listener in pool.get_dead_listeners().await? {
+        pool.cleanup_listener(listener).await?;
     }
     Ok(())
 }
@@ -27,7 +27,7 @@ fn start_session_cleanup_task(pool: db::DBPool) {
 }
 
 async fn process_sendqueue_once(pool: db::DBPool, listener_map: ListenerMap) -> DResult<()> {
-    for item in pool.clone().get_from_sendqueue().await? {
+    for item in pool.get_from_sendqueue().await? {
         match listener_map.lock().await.get(&item.session.listener).map(|l| l.clone()) {
             None => {}
             Some(listener_sender) => {
@@ -42,7 +42,7 @@ async fn process_sendqueue_once(pool: db::DBPool, listener_map: ListenerMap) -> 
                     }
                 ).await.unwrap_or(());
                 rx.await.unwrap_or(());
-                pool.clone().delete_from_sendqueue(&item).await?;
+                pool.delete_from_sendqueue(&item).await?;
             }
         }
     }
@@ -63,8 +63,8 @@ fn start_send_queue_task(pool: db::DBPool, listener_map: ListenerMap) {
     });
 }
 
-pub fn start_regular_tasks(pool: db::DBPool, listener_map: ListenerMap) -> DResult<()> {
+pub fn start_regular_tasks(pool: &db::DBPool, listener_map: ListenerMap) -> DResult<()> {
     start_session_cleanup_task(pool.clone());
-    start_send_queue_task(pool, listener_map);
+    start_send_queue_task(pool.clone(), listener_map);
     Ok(())
 }

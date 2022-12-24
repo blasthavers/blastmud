@@ -2,9 +2,11 @@ use crate::message_handler::ListenerSession;
 use crate::DResult;
 use crate::db::DBPool;
 use ansi_macro::ansi;
+use std::default::Default;
+use crate::models::session::Session;
 
-pub async fn handle(session: &ListenerSession, _source: &str, pool: DBPool) -> DResult<()> {
-    pool.clone().start_session(session).await?;
+pub async fn handle(session: &ListenerSession, source: String, pool: &DBPool) -> DResult<()> {
+    pool.start_session(session, &Session { source, ..Default::default() }).await?;
     pool.queue_for_session(&session, &ansi!("\
       Welcome to <red>BlastMud<reset> - a text-based post-apocalyptic \
       game <bold>restricted to adults (18+)<reset>\r\n\
