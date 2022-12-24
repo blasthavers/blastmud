@@ -3,7 +3,9 @@ use crate::db;
 use MessageFromListener::*;
 use uuid::Uuid;
 use crate::DResult;
-use ansi_macro::ansi;
+
+mod new_session;
+mod user_commands;
 
 #[derive(Clone,Debug)]
 pub struct ListenerSession {
@@ -15,15 +17,14 @@ pub async fn handle(listener: Uuid, msg: MessageFromListener, pool: db::DBPool)
                     -> DResult<()> {
     match msg {
         ListenerPing { .. } => { pool.record_listener_ping(listener).await?; }
-        SessionConnected { session, source: _ } => {
-            pool.start_session(ListenerSession { listener, session }).await?;
+        SessionConnected { session, source } => {
+            new_session::handle(&ListenerSession { listener, session }, &source, pool).await?;
         }
         SessionDisconnected { session } => {
             pool.end_session(ListenerSession { listener, session }).await?;
         }
         SessionSentLine { session, msg } => {
-            pool.queue_for_session(&ListenerSession { listener, session },
-                                   &format!(ansi!("You hear an echo saying: <bggreen><red>{}<reset>\r\n"), msg)).await?;
+            user_commands::handle(&ListenerSession { listener, session }, &msg, pool).await?;
         }
         AcknowledgeMessage => {}
     }

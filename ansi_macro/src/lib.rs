@@ -36,6 +36,7 @@ pub fn ansi(input: TokenStream) -> TokenStream {
                 Special(s) if s == "bold" => "\x1b[1m",
                 Special(s) if s == "under" => "\x1b[4m",
                 Special(s) if s == "strike" => "\x1b[9m",
+                Special(s) if s == "nounder" => "\x1b[24m",
                 Special(s) if s == "black" => "\x1b[30m",
                 Special(s) if s == "red" => "\x1b[31m",
                 Special(s) if s == "green" => "\x1b[32m",
@@ -52,6 +53,7 @@ pub fn ansi(input: TokenStream) -> TokenStream {
                 Special(s) if s == "bgmagenta" => "\x1b[45m",
                 Special(s) if s == "bgcyan" => "\x1b[46m",
                 Special(s) if s == "bgwhite" => "\x1b[47m",
+                Special(s) if s == "lt" => "<",
                 Special(r) => panic!("Unknown ansi type {}", r)
             }
         ), eof)(i).map(|(_, (r, _))| r)

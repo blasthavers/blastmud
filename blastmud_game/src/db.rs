@@ -65,9 +65,10 @@ impl DBPool {
         Ok(())
     }
 
-    pub async fn start_session(self: Self, session: ListenerSession) -> DResult<()> {
+    pub async fn start_session(self: Self, session: &ListenerSession) -> DResult<()> {
         self.get_conn().await?.execute(
-            "INSERT INTO sessions (session, listener, details) VALUES ($1, $2, '{}')",
+            "INSERT INTO sessions (session, listener, details) \
+               VALUES ($1, $2, '{}') ON CONFLICT (session) DO NOTHING",
             &[&session.session, &session.listener]
         ).await?;
         Ok(())
