@@ -164,6 +164,18 @@ impl DBTrans {
         Ok(())
     }
 
+    pub async fn get_session_model(self: &Self, session: &ListenerSession) -> DResult<Option<Session>> {
+        match self.pg_trans()?
+               .query_opt("SELECT details FROM sessions WHERE session = $1", &[&session.session])
+               .await? {
+            None => Ok(None),
+            Some(row) =>
+                Ok(Some(serde_json::from_value(
+                    row.get("details")
+                )?))
+        }
+    }
+    
     pub async fn commit(mut self: Self) -> DResult<()> {
         let trans_opt = self.with_trans_mut(|t| std::mem::replace(t, None));
         for trans in trans_opt {

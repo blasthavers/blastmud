@@ -19,13 +19,24 @@ static HELP_PAGES: phf::Map<&'static str, &'static str> = phf_map! {
          \t<bold>help register<reset> will tell you about the register command.")
 };
 
+static EXPLICIT_HELP_PAGES: phf::Map<&'static str, &'static str> = phf_map! {
+    "fuck" =>
+        ansi!("Type <bold>fuck <lt>name><reset> to fuck someone. It only works if \
+               they have consented.")
+};
+
 pub struct Verb;
 #[async_trait]
 impl UserVerb for Verb {
     async fn handle(self: &Self, ctx: &VerbContext, _verb: &str, remaining: &str) -> UResult<()> {
-        let help = HELP_PAGES.get(remaining).ok_or(
+        let mut help = None;
+        if !ctx.session_dat.less_explicit_mode {
+            help = help.or_else(|| EXPLICIT_HELP_PAGES.get(remaining))
+        }
+        help = help.or_else(|| HELP_PAGES.get(remaining));
+        let help_final = help.ok_or(
             UserError("No help available on that".to_string()))?;
-        ctx.trans.queue_for_session(ctx.session, &(help.to_string() + "\r\n")).await?;
+        ctx.trans.queue_for_session(ctx.session, &(help_final.to_string() + "\r\n")).await?;
         Ok(())
     }
 }
