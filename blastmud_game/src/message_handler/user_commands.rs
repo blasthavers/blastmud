@@ -62,7 +62,7 @@ pub async fn handle(session: &ListenerSession, msg: &str, pool: &DBPool) -> DRes
             match handler.handle(&VerbContext { session, pool }, cmd, params).await {
                 Ok(()) => {}
                 Err(UserError(err_msg)) => {
-                    pool.queue_for_session(session, &err_msg).await?;
+                    pool.queue_for_session(session, &(err_msg + "\r\n")).await?;
                 }
                 Err(SystemError(e)) => Err(e)?
             }
