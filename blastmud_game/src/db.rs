@@ -1,18 +1,28 @@
 use tokio_postgres::{config::Config as PgConfig, row::Row};
-use deadpool_postgres::{Manager, Object, ManagerConfig, Pool,
+use deadpool_postgres::{Manager, Object, ManagerConfig, Pool, Transaction,
                         RecyclingMethod};
 use std::error::Error;
 use std::str::FromStr;
+use ouroboros::self_referencing;
 use uuid::Uuid;
 use tokio_postgres::NoTls;
 use crate::message_handler::ListenerSession;
 use crate::DResult;
 use crate::models::session::Session;
 use serde_json;
+use futures::FutureExt;
 
 #[derive(Clone, Debug)]
 pub struct DBPool {
     pool: Pool
+}
+
+#[self_referencing]
+pub struct DBTrans {
+    conn: Object,
+    #[borrows(mut conn)]
+    #[covariant]
+    pub trans: Option<Transaction<'this>>
 }
 
 #[derive(Clone, Debug)]
@@ -90,6 +100,14 @@ impl DBPool {
         Ok(())
     }
 
+    pub async fn start_transaction(self: &Self) -> DResult<DBTrans> {
+        let conn = self.get_conn().await?;
+        Ok(DBTransAsyncSendTryBuilder {
+            conn,
+            trans_builder: |conn| Box::pin(conn.transaction().map(|r| r.map(Some)))
+        }.try_build().await?)
+    }
+    
     pub async fn queue_for_session(self: &Self,
                                        session: &ListenerSession,
                                        message: &str) -> DResult<()> {
@@ -133,5 +151,28 @@ impl DBPool {
         Pool::builder(mgr).max_size(4).build()
             .map_err(|e| Box::new(e) as Box<dyn Error + Send + Sync>)
             .map(|pool| Self { pool })
+    }
+}
+
+impl DBTrans {
+    pub async fn queue_for_session(self: &Self,
+                                   session: &ListenerSession,
+                                   message: &str) -> DResult<()> {
+        self.pg_trans()?
+            .execute("INSERT INTO sendqueue (session, listener, message) VALUES ($1, $2, $3)",
+                     &[&session.session, &session.listener, &message]).await?;
+        Ok(())
+    }
+
+    pub async fn commit(mut self: Self) -> DResult<()> {
+        let trans_opt = self.with_trans_mut(|t| std::mem::replace(t, None));
+        for trans in trans_opt {
+            trans.commit().await?;
+        }
+        Ok(())
+    }
+
+    pub fn pg_trans(self: &Self) -> DResult<&Transaction> {
+        self.borrow_trans().as_ref().ok_or("Transaction already closed".into())
     }
 }

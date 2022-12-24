@@ -1,6 +1,6 @@
 use super::ListenerSession;
 use crate::DResult;
-use crate::db::DBPool;
+use crate::db::{DBTrans, DBPool};
 use ansi_macro::ansi;
 use phf::phf_map;
 use async_trait::async_trait;
@@ -9,10 +9,9 @@ mod parsing;
 mod ignore;
 mod help;
 
-#[derive(Debug)]
 pub struct VerbContext<'l> {
     session: &'l ListenerSession,
-    pool: &'l DBPool
+    trans: &'l DBTrans
 }
 
 pub enum CommandHandlingError {
@@ -48,31 +47,27 @@ static ALWAYS_AVAILABLE_COMMANDS: UserVerbRegistry = phf_map! {
 
 pub async fn handle(session: &ListenerSession, msg: &str, pool: &DBPool) -> DResult<()> {
     let (cmd, params) = parsing::parse_command_name(msg);
+    let trans = pool.start_transaction().await?;
     let handler_opt = ALWAYS_AVAILABLE_COMMANDS.get(cmd);
 
     match handler_opt {
         None => {
-            pool.queue_for_session(session,
-                                   ansi!(
-                                       "That's not a command I know. Try <bold>help<reset>\r\n"
-                                   )
+            trans.queue_for_session(session,
+                                    ansi!(
+                                        "That's not a command I know. Try <bold>help<reset>\r\n"
+                                    )
             ).await?;
         }
         Some(handler) => {
-            match handler.handle(&VerbContext { session, pool }, cmd, params).await {
+            match handler.handle(&VerbContext { session, trans: &trans }, cmd, params).await {
                 Ok(()) => {}
                 Err(UserError(err_msg)) => {
-                    pool.queue_for_session(session, &(err_msg + "\r\n")).await?;
+                    trans.queue_for_session(session, &(err_msg + "\r\n")).await?;
                 }
                 Err(SystemError(e)) => Err(e)?
             }
         }
     }
-    /*
-    pool.queue_for_session(session,
-                           &format!(ansi!(
-                               "You hear an echo saying: <bggreen><red>{}<reset>\r\n"
-                           ), msg)).await?;
-     */
+    trans.commit().await?;
     Ok(())
 }

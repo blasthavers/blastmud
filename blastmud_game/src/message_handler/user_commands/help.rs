@@ -25,7 +25,7 @@ impl UserVerb for Verb {
     async fn handle(self: &Self, ctx: &VerbContext, _verb: &str, remaining: &str) -> UResult<()> {
         let help = HELP_PAGES.get(remaining).ok_or(
             UserError("No help available on that".to_string()))?;
-        ctx.pool.queue_for_session(ctx.session, &(help.to_string() + "\r\n")).await?;
+        ctx.trans.queue_for_session(ctx.session, &(help.to_string() + "\r\n")).await?;
         Ok(())
     }
 }
