@@ -12,6 +12,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 use std::collections::BTreeMap;
 use crate::DResult;
+use std::time::Instant;
 
 #[derive(Debug)]
 pub struct ListenerSend {
@@ -64,7 +65,8 @@ where
             return;
         }
     }
-    
+
+    let connected_at = Instant::now();
     let (sender, mut receiver) = mpsc::channel(1);
     listener_map.lock().await.insert(listener_id, sender);
     
@@ -129,11 +131,17 @@ where
                             match handle_fut.await {
                                 Ok(_) => {}
                                 Err(e) => {
-                                    // On the assumption errors that get here are bad enough that they are a
-                                    // problem with the system rather than the message, so we want to log and
-                                    // retry later.
-                                    warn!("Error from message handler - closing listener connection: {}", e);
-                                    break 'listener_loop;
+                                    if connected_at.elapsed() > std::time::Duration::from_secs(60) {
+                                        // On the assumption errors that get here are bad enough that they are a
+                                        // problem with the system rather than the message, so we want to log and
+                                        // retry later.
+                                        warn!("Error from message handler - closing listener connection: {}", e);
+                                        break 'listener_loop;
+                                    } else {
+                                        warn!("Error from message handler, but we only just connected, so \
+                                               acknowledging it anyway as a safety measure against reconnect \
+                                               loops: {}", e);
+                                    }
                                 }
                             }
 
