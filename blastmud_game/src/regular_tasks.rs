@@ -34,9 +34,14 @@ async fn process_sendqueue_once(pool: db::DBPool, listener_map: ListenerMap) -> 
                 let (tx, rx) = oneshot::channel();
                 listener_sender.send(
                     ListenerSend {
-                        message: MessageToListener::SendToSession {
-                            session: item.session.session.clone(),
-                            msg: item.message.clone()
+                        message: match item.message.clone() {
+                            None => MessageToListener::DisconnectSession {
+                                session: item.session.session.clone()
+                            },
+                            Some(msg) => MessageToListener::SendToSession {
+                                session: item.session.session.clone(),
+                                msg: msg
+                            }
                         },
                         ack_notify: tx
                     }

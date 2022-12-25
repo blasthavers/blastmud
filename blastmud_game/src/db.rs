@@ -29,7 +29,7 @@ pub struct DBTrans {
 pub struct SendqueueItem {
     pub item: i64,
     pub session: ListenerSession,
-    pub message: String
+    pub message: Option<String>
 }
 impl From<Row> for SendqueueItem {
     fn from(row: Row) -> Self {
@@ -110,7 +110,7 @@ impl DBPool {
     
     pub async fn queue_for_session(self: &Self,
                                        session: &ListenerSession,
-                                       message: &str) -> DResult<()> {
+                                       message: Option<&str>) -> DResult<()> {
         let conn = self.get_conn().await?;
         conn.execute("INSERT INTO sendqueue (session, listener, message) VALUES ($1, $2, $3)",
                      &[&session.session, &session.listener, &message]).await?;
@@ -157,7 +157,7 @@ impl DBPool {
 impl DBTrans {
     pub async fn queue_for_session(self: &Self,
                                    session: &ListenerSession,
-                                   message: &str) -> DResult<()> {
+                                   message: Option<&str>) -> DResult<()> {
         self.pg_trans()?
             .execute("INSERT INTO sendqueue (session, listener, message) VALUES ($1, $2, $3)",
                      &[&session.session, &session.listener, &message]).await?;

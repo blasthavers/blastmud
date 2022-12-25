@@ -36,7 +36,9 @@ impl UserVerb for Verb {
         help = help.or_else(|| HELP_PAGES.get(remaining));
         let help_final = help.ok_or(
             UserError("No help available on that".to_string()))?;
-        ctx.trans.queue_for_session(ctx.session, &(help_final.to_string() + "\r\n")).await?;
+        ctx.trans.queue_for_session(ctx.session,
+                                    Some(&(help_final.to_string() + "\r\n"))
+        ).await?;
         Ok(())
     }
 }

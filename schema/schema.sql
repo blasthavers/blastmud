@@ -40,12 +40,13 @@ CREATE UNLOGGED TABLE sendqueue (
   item BIGSERIAL NOT NULL PRIMARY KEY,
   session UUID NOT NULL REFERENCES sessions(session),
   listener UUID REFERENCES listeners(listener),
-  message TEXT NOT NULL
+  message TEXT /* Nullable, null means disconnect */
 );
 
 CREATE TABLE tasks (
   task_code TEXT NOT NULL,
   task_type TEXT NOT NULL,
+  is_static BOOL NOT NULL,
   next_scheduled TIMESTAMP WITH TIME ZONE NOT NULL,
   details JSONB NOT NULL,
   PRIMARY KEY (task_code, task_type)
