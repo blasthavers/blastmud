@@ -4,17 +4,20 @@ use crate::db::{DBTrans, DBPool};
 use ansi_macro::ansi;
 use phf::phf_map;
 use async_trait::async_trait;
-use crate::models::session::Session;
+use crate::models::{session::Session, user::User};
 use log::warn;
 
 mod parsing;
 mod ignore;
 mod help;
 mod quit;
+mod less_explicit_mode;
+mod register;
 
 pub struct VerbContext<'l> {
     session: &'l ListenerSession,
     session_dat: &'l mut Session,
+    user_dat: &'l mut Option<User>,
     trans: &'l DBTrans
 }
 
@@ -26,10 +29,9 @@ use CommandHandlingError::*;
 
 #[async_trait]
 pub trait UserVerb {
-    async fn handle(self: &Self, ctx: &VerbContext, verb: &str, remaining: &str) -> UResult<()>;
+    async fn handle(self: &Self, ctx: &mut VerbContext, verb: &str, remaining: &str) -> UResult<()>;
 }
 
-pub type UserVerbRef = &'static (dyn UserVerb + Sync + Send);
 pub type UResult<A> = Result<A, CommandHandlingError>;
 
 impl From<Box<dyn std::error::Error + Send + Sync>> for CommandHandlingError {
@@ -42,6 +44,9 @@ pub fn user_error<A>(msg: String) -> UResult<A> {
     Err(UserError(msg))
 }
 
+
+/* Verb registries list types of commands available in different circumstances. */
+pub type UserVerbRef = &'static (dyn UserVerb + Sync + Send);
 type UserVerbRegistry = phf::Map<&'static str, UserVerbRef>;
 
 static ALWAYS_AVAILABLE_COMMANDS: UserVerbRegistry = phf_map! {
@@ -50,10 +55,26 @@ static ALWAYS_AVAILABLE_COMMANDS: UserVerbRegistry = phf_map! {
     "quit" => quit::VERB,
 };
 
+static UNREGISTERED_COMMANDS: UserVerbRegistry = phf_map! {
+    "less_explicit_mode" => less_explicit_mode::VERB,
+    "register" => register::VERB,
+};
+
+fn resolve_handler(ctx: &VerbContext, cmd: &str) -> Option<&'static UserVerbRef> {
+    let mut result = ALWAYS_AVAILABLE_COMMANDS.get(cmd);
+
+    match ctx.user_dat {
+        None => { result = result.or_else(|| UNREGISTERED_COMMANDS.get(cmd)); }
+        Some(_) => {}
+    }
+
+    result
+}
+
 pub async fn handle(session: &ListenerSession, msg: &str, pool: &DBPool) -> DResult<()> {
     let (cmd, params) = parsing::parse_command_name(msg);
     let trans = pool.start_transaction().await?;
-    let mut session_dat = match trans.get_session_model(session).await? {
+    let (mut session_dat, mut user_dat) = match trans.get_session_user_model(session).await? {
         None => {
             // If the session has been cleaned up from the database, there is
             // nowhere to go from here, so just ignore it.
@@ -62,8 +83,10 @@ pub async fn handle(session: &ListenerSession, msg: &str, pool: &DBPool) -> DRes
         }
         Some(v) => v
     };
-    let handler_opt = ALWAYS_AVAILABLE_COMMANDS.get(cmd);
-    let ctx = VerbContext { session, trans: &trans, session_dat: &mut session_dat };
+  
+    let mut ctx = VerbContext { session, trans: &trans, session_dat: &mut session_dat,
+                                user_dat: &mut user_dat };
+    let handler_opt = resolve_handler(&ctx, cmd);
     
     match handler_opt {
         None => {
@@ -74,7 +97,7 @@ pub async fn handle(session: &ListenerSession, msg: &str, pool: &DBPool) -> DRes
             ).await?;
         }
         Some(handler) => {
-            match handler.handle(&ctx, cmd, params).await {
+            match handler.handle(&mut ctx, cmd, params).await {
                 Ok(()) => {}
                 Err(UserError(err_msg)) => {
                     trans.queue_for_session(session, Some(&(err_msg + "\r\n"))).await?;

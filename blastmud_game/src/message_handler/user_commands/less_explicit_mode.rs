@@ -2,15 +2,13 @@ use super::{
     VerbContext, UserVerb, UserVerbRef, UResult
 };
 use async_trait::async_trait;
-use ansi_macro::ansi;
 
 pub struct Verb;
 #[async_trait]
 impl UserVerb for Verb {
     async fn handle(self: &Self, ctx: &mut VerbContext, _verb: &str, _remaining: &str) -> UResult<()> {
-        ctx.trans.queue_for_session(ctx.session,
-                                    Some(ansi!("<red>Bye!<reset>\r\n"))).await?;
-        ctx.trans.queue_for_session(ctx.session, None).await?;
+        (*ctx.session_dat).less_explicit_mode = true;
+        ctx.trans.save_session_model(ctx.session, ctx.session_dat).await?;
         Ok(())
     }
 }

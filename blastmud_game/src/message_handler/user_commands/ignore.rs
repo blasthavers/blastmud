@@ -4,7 +4,7 @@ use async_trait::async_trait;
 pub struct Verb;
 #[async_trait]
 impl UserVerb for Verb {
-    async fn handle(self: &Self, _ctx: &VerbContext, _verb: &str, _remaining: &str) -> UResult<()> {
+    async fn handle(self: &Self, _ctx: &mut VerbContext, _verb: &str, _remaining: &str) -> UResult<()> {
         Ok(())
     }
 }

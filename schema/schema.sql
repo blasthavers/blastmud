@@ -18,15 +18,12 @@ CREATE TABLE sessions (
 CREATE INDEX session_by_listener ON sessions(listener);
 
 CREATE TABLE items (
-  item_id BIGINT NOT NULL PRIMARY KEY,
-  item_code TEXT NOT NULL,
-  item_type TEXT NOT NULL,
-  location BIGINT REFERENCES items(item_id),
-  details JSONB NOT NULL,
-  UNIQUE (item_code, item_type)
+  item_id BIGSERIAL NOT NULL PRIMARY KEY,
+  details JSONB NOT NULL
 );
-CREATE INDEX item_index ON items (item_code, item_type);
-CREATE INDEX item_by_loc ON items (location);
+CREATE UNIQUE INDEX item_index ON items ((details->>'item_code'), (details->>'item_type'));
+CREATE INDEX item_by_loc ON items ((details->>'location'));
+CREATE INDEX item_by_static ON items ((cast(details->>'is_static' as boolean)));
   
 CREATE TABLE users (
   username TEXT NOT NULL PRIMARY KEY,
@@ -35,6 +32,7 @@ CREATE TABLE users (
   details JSONB NOT NULL
 );
 CREATE INDEX user_by_listener ON users(current_listener);
+CREATE INDEX user_by_session ON users(current_session);
 
 CREATE UNLOGGED TABLE sendqueue (
   item BIGSERIAL NOT NULL PRIMARY KEY,
@@ -44,11 +42,9 @@ CREATE UNLOGGED TABLE sendqueue (
 );
 
 CREATE TABLE tasks (
-  task_code TEXT NOT NULL,
-  task_type TEXT NOT NULL,
-  is_static BOOL NOT NULL,
-  next_scheduled TIMESTAMP WITH TIME ZONE NOT NULL,
-  details JSONB NOT NULL,
-  PRIMARY KEY (task_code, task_type)
+  task_id BIGSERIAL NOT NULL PRIMARY KEY,
+  details JSONB NOT NULL
 );
-CREATE INDEX task_by_next_scheduled ON tasks(next_scheduled);
+CREATE UNIQUE INDEX tasks_by_code_type ON tasks((details->>'task_code'), (details->>'task_type'));
+CREATE INDEX tasks_by_static ON tasks((cast(details->>'is_static' as boolean)));
+CREATE INDEX tasks_by_scheduled ON tasks((details->>'next_scheduled'));

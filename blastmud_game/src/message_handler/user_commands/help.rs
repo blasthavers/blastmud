@@ -28,7 +28,7 @@ static EXPLICIT_HELP_PAGES: phf::Map<&'static str, &'static str> = phf_map! {
 pub struct Verb;
 #[async_trait]
 impl UserVerb for Verb {
-    async fn handle(self: &Self, ctx: &VerbContext, _verb: &str, remaining: &str) -> UResult<()> {
+    async fn handle(self: &Self, ctx: &mut VerbContext, _verb: &str, remaining: &str) -> UResult<()> {
         let mut help = None;
         if !ctx.session_dat.less_explicit_mode {
             help = help.or_else(|| EXPLICIT_HELP_PAGES.get(remaining))

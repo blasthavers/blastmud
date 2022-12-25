@@ -9,6 +9,7 @@ use tokio_postgres::NoTls;
 use crate::message_handler::ListenerSession;
 use crate::DResult;
 use crate::models::session::Session;
+use crate::models::user::User;
 use serde_json;
 use futures::FutureExt;
 
@@ -164,18 +165,34 @@ impl DBTrans {
         Ok(())
     }
 
-    pub async fn get_session_model(self: &Self, session: &ListenerSession) -> DResult<Option<Session>> {
+    pub async fn get_session_user_model(self: &Self, session: &ListenerSession) -> DResult<Option<(Session, Option<User>)>> {
         match self.pg_trans()?
-               .query_opt("SELECT details FROM sessions WHERE session = $1", &[&session.session])
+               .query_opt("SELECT s.details AS sess_details, \
+                          u.details AS user_details FROM sessions s \
+                          LEFT JOIN users u ON u.current_session = s.session \
+                          WHERE s.session = $1", &[&session.session])
                .await? {
             None => Ok(None),
             Some(row) =>
-                Ok(Some(serde_json::from_value(
-                    row.get("details")
-                )?))
+                       Ok(Some(
+                           (serde_json::from_value(
+                               row.get("sess_details"))?,
+                            match row.get::<&str, Option<serde_json::Value>>("user_details") {
+                                None => None,
+                                Some(v) => serde_json::from_value(v)?
+                            })
+                       ))
         }
     }
-    
+
+    pub async fn save_session_model(self: &Self, session: &ListenerSession, details: &Session)
+                                    -> DResult<()> {
+        self.pg_trans()?
+            .execute("UPDATE sessions SET details = $1 WHERE session = $2",
+                     &[&serde_json::to_value(details)?, &session.session]).await?;
+        Ok(())
+    }
+
     pub async fn commit(mut self: Self) -> DResult<()> {
         let trans_opt = self.with_trans_mut(|t| std::mem::replace(t, None));
         for trans in trans_opt {
