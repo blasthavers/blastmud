@@ -13,6 +13,7 @@ mod help;
 mod quit;
 mod less_explicit_mode;
 mod register;
+mod agree;
 
 pub struct VerbContext<'l> {
     session: &'l ListenerSession,
@@ -33,6 +34,13 @@ pub trait UserVerb {
 }
 
 pub type UResult<A> = Result<A, CommandHandlingError>;
+
+
+impl From<&str> for CommandHandlingError {
+    fn from(input: &str) -> CommandHandlingError {
+        SystemError(Box::from(input))
+    }
+}
 
 impl From<Box<dyn std::error::Error + Send + Sync>> for CommandHandlingError {
     fn from(input: Box<dyn std::error::Error + Send + Sync>) -> CommandHandlingError {
@@ -58,14 +66,26 @@ static ALWAYS_AVAILABLE_COMMANDS: UserVerbRegistry = phf_map! {
 static UNREGISTERED_COMMANDS: UserVerbRegistry = phf_map! {
     "less_explicit_mode" => less_explicit_mode::VERB,
     "register" => register::VERB,
+    "agree" => agree::VERB
+};
+
+static REGISTERED_COMMANDS: UserVerbRegistry = phf_map! {
 };
 
 fn resolve_handler(ctx: &VerbContext, cmd: &str) -> Option<&'static UserVerbRef> {
     let mut result = ALWAYS_AVAILABLE_COMMANDS.get(cmd);
 
-    match ctx.user_dat {
-        None => { result = result.or_else(|| UNREGISTERED_COMMANDS.get(cmd)); }
-        Some(_) => {}
+    match &ctx.user_dat {
+        None => {
+            result = result.or_else(|| UNREGISTERED_COMMANDS.get(cmd));
+        }
+        Some(user_dat) => {
+            if user_dat.terms.terms_complete {
+                result = result.or_else(|| REGISTERED_COMMANDS.get(cmd));
+            } else if cmd == "agree" {
+                result = Some(&agree::VERB);
+            }
+        }
     }
 
     result
@@ -95,17 +115,19 @@ pub async fn handle(session: &ListenerSession, msg: &str, pool: &DBPool) -> DRes
                                         "That's not a command I know. Try <bold>help<reset>\r\n"
                                     ))
             ).await?;
+            trans.commit().await?;
         }
         Some(handler) => {
             match handler.handle(&mut ctx, cmd, params).await {
-                Ok(()) => {}
+                Ok(()) => {
+                    trans.commit().await?;
+                }
                 Err(UserError(err_msg)) => {
-                    trans.queue_for_session(session, Some(&(err_msg + "\r\n"))).await?;
+                    pool.queue_for_session(session, Some(&(err_msg + "\r\n"))).await?;
                 }
                 Err(SystemError(e)) => Err(e)?
             }
         }
     }
-    trans.commit().await?;
     Ok(())
 }

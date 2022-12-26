@@ -44,6 +44,8 @@ pub enum LocationActionType {
 pub struct Item {
     pub item_code: String,
     pub item_type: String,
+    pub display: String,
+    pub display_less_explicit: Option<String>,
     pub location: String, // Item reference as item_type/item_code.
     pub action_type: LocationActionType,
     pub presence_target: Option<String>, // e.g. what are they sitting on.
@@ -53,4 +55,23 @@ pub struct Item {
     pub total_stats: BTreeMap<StatType, u64>,
     pub total_skills: BTreeMap<SkillType, u64>,
     pub temporary_buffs: Vec<Buff>,
+}
+
+impl Default for Item {
+    fn default() -> Self {
+        Item {
+            item_code: "unset".to_owned(),
+            item_type: "unset".to_owned(),
+            display: "Item".to_owned(),
+            display_less_explicit: None,
+            location: "room/storage".to_owned(),
+            action_type: LocationActionType::Normal,
+            presence_target: None,
+            is_static: false,
+            total_xp: 0,
+            total_stats: BTreeMap::new(),
+            total_skills: BTreeMap::new(),
+            temporary_buffs: Vec::new()
+        }
+    }
 }

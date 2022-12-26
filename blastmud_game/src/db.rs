@@ -8,8 +8,8 @@ use uuid::Uuid;
 use tokio_postgres::NoTls;
 use crate::message_handler::ListenerSession;
 use crate::DResult;
-use crate::models::session::Session;
-use crate::models::user::User;
+use crate::models::{session::Session, user::User, item::Item};
+
 use serde_json;
 use futures::FutureExt;
 
@@ -193,9 +193,43 @@ impl DBTrans {
         Ok(())
     }
 
+    pub async fn find_by_username(self: &Self, username: &str) -> DResult<Option<User>> {
+        if let Some(details_json) = self.pg_trans()?
+            .query_opt("SELECT details FROM users WHERE username=$1",
+                       &[&username.to_lowercase()]).await? {
+                return Ok(Some(serde_json::from_value(details_json.get("details"))?))
+            }
+        Ok(None)
+    }
+
+    pub async fn create_item(self: &Self, item: &Item) -> DResult<i64> {
+        Ok(self.pg_trans()?.query_one("INSERT INTO items (details) VALUES ($1) RETURNING item_id",
+                                   &[&serde_json::to_value(item)?]).await?
+           .get("item_id"))
+    }
+    
+    pub async fn create_user(self: &Self, session: &ListenerSession, user_dat: &User) -> DResult<()> {
+        self.pg_trans()?.execute("INSERT INTO users (\
+              username, current_session, current_listener, details\
+              ) VALUES ($1, $2, $3, $4)", &[&user_dat.username.to_lowercase(),
+                                            &session.session,
+                                            &session.listener,
+                                            &serde_json::to_value(user_dat)?]).await?;
+        Ok(())
+    }
+
+    pub async fn save_user_model(self: &Self, details: &User)
+                                 -> DResult<()> {
+        self.pg_trans()?
+            .execute("UPDATE users SET details = $1 WHERE username = $2",
+                     &[&serde_json::to_value(details)?,
+                       &details.username.to_lowercase()]).await?;
+        Ok(())
+    }
+    
     pub async fn commit(mut self: Self) -> DResult<()> {
         let trans_opt = self.with_trans_mut(|t| std::mem::replace(t, None));
-        for trans in trans_opt {
+        if let Some(trans) = trans_opt {
             trans.commit().await?;
         }
         Ok(())

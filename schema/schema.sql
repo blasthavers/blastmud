@@ -26,6 +26,7 @@ CREATE INDEX item_by_loc ON items ((details->>'location'));
 CREATE INDEX item_by_static ON items ((cast(details->>'is_static' as boolean)));
   
 CREATE TABLE users (
+  -- Username here is all lower case, but details has correct case version.
   username TEXT NOT NULL PRIMARY KEY,
   current_session UUID REFERENCES sessions(session),
   current_listener UUID REFERENCES listeners(listener),

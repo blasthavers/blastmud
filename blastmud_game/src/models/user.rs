@@ -5,6 +5,7 @@ use std::collections::BTreeMap;
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct UserTermData {
     pub accepted_terms: BTreeMap<String, DateTime<Utc>>,
+    pub terms_complete: bool, // Recalculated on accept and login.
     pub last_presented_term: Option<String>,
 }
 
@@ -65,7 +66,7 @@ pub enum StatType {
 pub struct User {
     pub username: String,
     pub password_hash: String, // bcrypted.
-    pub player_item_id: u64,
+    pub player_item_id: i64,
     pub registered_at: Option<DateTime<Utc>>,
     pub banned_until: Option<DateTime<Utc>>,
     pub abandoned_at: Option<DateTime<Utc>>,
@@ -83,6 +84,7 @@ impl Default for UserTermData {
     fn default() -> Self {
         UserTermData {
             accepted_terms: BTreeMap::new(),
+            terms_complete: false,
             last_presented_term: None
         }
     }
