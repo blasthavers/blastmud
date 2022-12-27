@@ -10,6 +10,7 @@ use crate::message_handler::ListenerSession;
 use crate::DResult;
 use crate::models::{session::Session, user::User, item::Item};
 use tokio_postgres::types::ToSql;
+use std::collections::BTreeSet;
 
 use serde_json;
 use futures::FutureExt;
@@ -132,6 +133,24 @@ impl DBPool {
         conn.execute("DELETE FROM sendqueue WHERE item=$1", &[&item.item]).await?;
         Ok(())
     }
+
+    pub async fn find_static_item_types(self: &Self) -> DResult<Box<BTreeSet<String>>> {
+        Ok(Box::new(
+            self
+                .get_conn().await?
+                .query("SELECT DISTINCT details->>'item_type' AS item_type \
+                        FROM items WHERE details->>'is_static' = 'true'", &[]).await?
+               .iter()
+                .map(|r| r.get("item_type"))
+                .collect()))
+    }
+    
+    pub async fn delete_static_items_by_type(self: &Self, item_type: &str) -> DResult<()> {
+        self.get_conn().await?.query(
+            "DELETE FROM items WHERE details->>'is_static' = 'true' AND details->>'item_type' = {}",
+            &[&item_type]).await?;
+        Ok(())
+    }
     
     pub async fn get_conn(self: &DBPool) ->
         DResult<Object> {
@@ -240,6 +259,29 @@ impl DBTrans {
         self.pg_trans()?
             .execute("UPDATE users SET current_session = $1, current_listener = $2 WHERE username = $3",
                      &[&session.session as &(dyn ToSql + Sync), &session.listener, &username_l]).await?;
+        Ok(())
+    }
+    
+    pub async fn find_static_items_by_type(self: &Self, item_type: &str) ->
+        DResult<Box<BTreeSet<String>>> {
+        Ok(Box::new(
+            self.pg_trans()?
+                .query("SELECT DISTINCT details->>'item_code' AS item_code FROM items WHERE \
+                        details->>'is_static' = 'true' AND \
+                        details->>'item_type' = $1", &[&item_type])
+                .await?
+                .into_iter()
+                .map(|v| v.get("item_code"))
+                .collect()))
+    }
+
+    pub async fn delete_static_items_by_code(self: &Self, item_type: &str,
+                                             item_code: &str) -> DResult<()> {
+        self.pg_trans()?.query(
+            "DELETE FROM items WHERE details->>'is_static' = 'true' AND \
+               details->>'item_type' = {} AND \
+               details->>'item_code' = {}",
+            &[&item_type, &item_code]).await?;
         Ok(())
     }
     

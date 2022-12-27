@@ -13,6 +13,7 @@ mod version_cutover;
 mod av;
 mod regular_tasks;
 mod models;
+mod static_content;
 
 pub type DResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
 
@@ -53,6 +54,8 @@ async fn main() -> DResult<()> {
                              }
     ).await?;
 
+    static_content::refresh_static_content(&pool).await?;
+    
     version_cutover::replace_old_gameserver(&config.pidfile)?;
     regular_tasks::start_regular_tasks(&pool, listener_map)?;
     

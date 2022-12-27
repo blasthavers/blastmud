@@ -21,7 +21,7 @@ CREATE TABLE items (
   item_id BIGSERIAL NOT NULL PRIMARY KEY,
   details JSONB NOT NULL
 );
-CREATE UNIQUE INDEX item_index ON items ((details->>'item_code'), (details->>'item_type'));
+CREATE UNIQUE INDEX item_index ON items ((details->>'item_type'), (details->>'item_code'));
 CREATE INDEX item_by_loc ON items ((details->>'location'));
 CREATE INDEX item_by_static ON items ((cast(details->>'is_static' as boolean)));
   

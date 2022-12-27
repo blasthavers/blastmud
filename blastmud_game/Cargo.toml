@@ -32,3 +32,4 @@ ouroboros = "0.15.5"
 chrono = { version = "0.4.23", features = ["serde"] }
 bcrypt = "0.13.0"
 validator = "0.16.0"
+itertools = "0.10.5"
