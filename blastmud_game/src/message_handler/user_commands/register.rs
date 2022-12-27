@@ -4,23 +4,30 @@ use super::{user_error, parsing::parse_username};
 use crate::models::{user::User, item::Item};
 use chrono::Utc;
 use ansi_macro::ansi;
+use tokio::time;
 
 pub struct Verb;
 #[async_trait]
 impl UserVerb for Verb {
     async fn handle(self: &Self, ctx: &mut VerbContext, _verb: &str, remaining: &str) -> UResult<()> {
-        let (username, mut password) = match parse_username(remaining) {
+        let (username, password, email) = match parse_username(remaining) {
             Err(e) => user_error("Invalid username: ".to_owned() + e)?,
-            Ok(r) => r
+            Ok((username, rest)) => {
+                match rest.split_whitespace().collect::<Vec<&str>>()[..] {
+                    [password, email] => (username, password, email),
+                    [] | [_] => user_error("Too few options to register - supply username, password, and email".to_owned())?,
+                    _ => user_error("Too many options to register - supply username, password, and email".to_owned())?,
+                }
+            }
         };
-        password = password.trim();
+        
         if ctx.trans.find_by_username(username).await?.is_some() {
             user_error("Username already exists".to_owned())?;
         }
-        if password.contains(" ") || password.contains("\t") {
-            user_error("To avoid future confusion, password can't contain spaces / tabs".to_owned())?;
-        } else if password.len() < 6 {
+        if password.len() < 6 {
             user_error("Password must be 6 characters long or longer".to_owned())?;
+        } else if !validator::validate_email(email) {
+            user_error("Please supply a valid email in case you need to reset your password.".to_owned())?;
         }
         
         let player_item_id = ctx.trans.create_item(&Item {
@@ -30,10 +37,14 @@ impl UserVerb for Verb {
             location: "room/chargen_room".to_owned(),
             ..Item::default()
         }).await?;
+
+        // Force a wait to protect against abuse.
+        time::sleep(time::Duration::from_secs(5)).await;
         let password_hash = bcrypt::hash(password, 10).expect("hash not to fail");
         let user_dat = User {
             username: username.to_owned(),
             password_hash: password_hash.to_owned(),
+            email: email.to_owned(),
             player_item_id,
             registered_at: Some(Utc::now()),
             ..User::default()

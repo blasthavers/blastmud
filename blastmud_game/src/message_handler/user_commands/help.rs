@@ -20,19 +20,25 @@ static UNREGISTERED_HELP_PAGES: phf::Map<&'static str, &'static str> = phf_map! 
           Topics of interest to unregistered users:\r\n\
           \t<bold>register<reset>\tLearn about the <bold>register<reset> command.\r\n\
           \t<bold>login<reset>\tLearn how to log in as an existing user.\r\n"),
+    "register" =>
+        ansi!("Registers a new user. You are allowed at most 5 at once.\r\n\
+               \t<bold>register <lt>username> <lt>password> <lt>email><reset>\r\n\
+               Email will be used to check you don't have too many accounts and \
+               in case you need to reset your password."),
+    "login" =>
+        ansi!("Logs in as an existing user.\r\n\
+              \t<bold>login <lt>username> <lt>password<reset>")
 };
 
 static REGISTERED_HELP_PAGES: phf::Map<&'static str, &'static str> = phf_map! {
     "" =>
         ansi!("Type <bold>help <lt>topicname><reset> to learn about a topic. Most \
           commands can be used as a topicname.\r\n\
-          Topics of interest to new users:\r\n\
-          \t<bold>register<reset>\tLearn about the <bold>register<reset> command.\r\n\
-          \t<bold>newbie<reset>\tLearn how to survive as a newb."),
-    "<topicname>" =>
-        ansi!("You are supposed to replace <lt>topicname> with the topic you want \
-         to learn about. Example:\r\n\
-         \t<bold>help register<reset> will tell you about the register command.")
+          Topics of interest:\r\n\
+          \t<bold>newbie<reset>\tLearn the absolute basics."),
+    "newbie" =>
+        ansi!("So you've just landed in BlastMud, and want to know how to get started?\r\n\
+               As we develop the game, this will eventually have some useful information for you!"),
 };
 
 static EXPLICIT_HELP_PAGES: phf::Map<&'static str, &'static str> = phf_map! {

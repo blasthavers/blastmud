@@ -1,7 +1,8 @@
-use super::{VerbContext, UserVerb, UserVerbRef, UResult};
+use super::{VerbContext, UserVerb, UserVerbRef, UResult, user_error};
 use crate::models::user::{User, UserTermData};
 use async_trait::async_trait;
 use ansi_macro::ansi;
+use chrono::Utc;
 
 pub struct Verb;
 
@@ -23,7 +24,7 @@ static REQUIRED_AGREEMENTS: [&str;4] = [
      is personally identifying information, or is objectionable or abhorrent (including, without \
      limitation, any content related to sexual violence, real or fictional children under 18, bestiality, \
      the promotion or glorification of proscribed drug use, or fetishes that involve degrading or \
-     inflicting pain in someone for the enjoyment of others). I agree to defend, indemnify, and hold \
+     inflicting pain on someone for the enjoyment of others). I agree to defend, indemnify, and hold \
      harmless the creators, staff, volunteers and contributors in any matter relating to content sent \
      (or re-sent) by me, in any matter arising from the game sending content to me, and in any matter \
      consequential to sharing my password, using an insecure password, or otherwise allowing or taking \
@@ -68,7 +69,9 @@ fn first_outstanding_agreement(ctx: &VerbContext) -> UResult<Option<(String, Str
 pub async fn check_and_notify_accepts<'a, 'b>(ctx: &'a mut VerbContext<'b>) -> UResult<bool> where 'b: 'a {
     match first_outstanding_agreement(ctx)? {
         None => {
-            user_mut(ctx)?.terms.terms_complete = true;
+            let user = user_mut(ctx)?;
+            user.terms.terms_complete = true;
+            user.terms.last_presented_term = None;
             Ok(true)
         }
         Some((text, hash)) => {
@@ -77,9 +80,9 @@ pub async fn check_and_notify_accepts<'a, 'b>(ctx: &'a mut VerbContext<'b>) -> U
             user.terms.last_presented_term = Some(hash);
             ctx.trans.queue_for_session(ctx.session, Some(&format!(ansi!(
                 "Please review the following:\r\n\
-                {}\r\n\
-                Type <bold>agree<reset> to accept. If you can't or don't agree, you \
-                unfortunately can't play, so type <bold>quit<reset> to log off.\r\n"),
+                \t{}\r\n\
+                Type <green><bold>agree<reset> to accept. If you can't or don't agree, you \
+                unfortunately can't play, so type <red><bold>quit<reset> to log off.\r\n"),
                 text))).await?;
             Ok(false)
         }
@@ -88,7 +91,24 @@ pub async fn check_and_notify_accepts<'a, 'b>(ctx: &'a mut VerbContext<'b>) -> U
 
 #[async_trait]
 impl UserVerb for Verb {
-    async fn handle(self: &Self, _ctx: &mut VerbContext, _verb: &str, _remaining: &str) -> UResult<()> {
+    async fn handle(self: &Self, ctx: &mut VerbContext, _verb: &str, _remaining: &str) -> UResult<()> {
+        let user = user_mut(ctx)?;
+        match user.terms.last_presented_term.as_ref() {
+            None => {
+                drop(user);
+                user_error("There was nothing pending your agreement.".to_owned())?;
+            }
+            Some(last_term) => {
+                user.terms.accepted_terms.insert(last_term.to_owned(), Utc::now());
+                drop(user);
+                if check_and_notify_accepts(ctx).await? {
+                    ctx.trans.queue_for_session(ctx.session, Some(
+                        ansi!("That was the last of the terms to agree to - welcome onboard!\r\n\
+                               Hint: Try <bold>l<reset> to look around.\r\n"))).await?;
+                }
+            }
+        }
+        ctx.trans.save_user_model(ctx.user_dat.as_ref().unwrap()).await?;
         Ok(())
     }
 }

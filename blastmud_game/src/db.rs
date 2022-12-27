@@ -9,6 +9,7 @@ use tokio_postgres::NoTls;
 use crate::message_handler::ListenerSession;
 use crate::DResult;
 use crate::models::{session::Session, user::User, item::Item};
+use tokio_postgres::types::ToSql;
 
 use serde_json;
 use futures::FutureExt;
@@ -224,6 +225,21 @@ impl DBTrans {
             .execute("UPDATE users SET details = $1 WHERE username = $2",
                      &[&serde_json::to_value(details)?,
                        &details.username.to_lowercase()]).await?;
+        Ok(())
+    }
+
+    pub async fn attach_user_to_session(self: &Self, username: &str,
+                                        session: &ListenerSession) -> DResult<()> {
+        let username_l = username.to_lowercase();
+        self.pg_trans()?
+            .execute("INSERT INTO sendqueue (session, listener, message) \
+                      SELECT current_session, current_listener, $1 FROM users \
+                      WHERE username = $2 AND current_session IS NOT NULL \
+                      AND current_listener IS NOT NULL",
+                     &[&"Logged in from another session\r\n", &username_l]).await?;
+        self.pg_trans()?
+            .execute("UPDATE users SET current_session = $1, current_listener = $2 WHERE username = $3",
+                     &[&session.session as &(dyn ToSql + Sync), &session.listener, &username_l]).await?;
         Ok(())
     }
     

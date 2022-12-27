@@ -66,6 +66,7 @@ pub enum StatType {
 pub struct User {
     pub username: String,
     pub password_hash: String, // bcrypted.
+    pub email: String,
     pub player_item_id: i64,
     pub registered_at: Option<DateTime<Utc>>,
     pub banned_until: Option<DateTime<Utc>>,
@@ -106,6 +107,7 @@ impl Default for User {
         User {
             username: "unknown".to_owned(),
             password_hash: "unknown".to_owned(),
+            email: "unknown".to_owned(),
             player_item_id: 0,
             registered_at: None,
             banned_until: None,

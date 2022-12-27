@@ -14,6 +14,7 @@ mod quit;
 mod less_explicit_mode;
 mod register;
 mod agree;
+mod login;
 
 pub struct VerbContext<'l> {
     session: &'l ListenerSession,
@@ -36,15 +37,9 @@ pub trait UserVerb {
 pub type UResult<A> = Result<A, CommandHandlingError>;
 
 
-impl From<&str> for CommandHandlingError {
-    fn from(input: &str) -> CommandHandlingError {
-        SystemError(Box::from(input))
-    }
-}
-
-impl From<Box<dyn std::error::Error + Send + Sync>> for CommandHandlingError {
-    fn from(input: Box<dyn std::error::Error + Send + Sync>) -> CommandHandlingError {
-        SystemError(input)
+impl<T> From<T> for CommandHandlingError where T: Into<Box<dyn std::error::Error + Send + Sync>> {
+    fn from(input: T) -> CommandHandlingError {
+        SystemError(input.into())
     }
 }
 
@@ -66,6 +61,8 @@ static ALWAYS_AVAILABLE_COMMANDS: UserVerbRegistry = phf_map! {
 static UNREGISTERED_COMMANDS: UserVerbRegistry = phf_map! {
     "less_explicit_mode" => less_explicit_mode::VERB,
     "register" => register::VERB,
+    "login" => login::VERB,
+    "connect" => login::VERB,
     "agree" => agree::VERB
 };
 

@@ -31,3 +31,4 @@ nom = "7.1.1"
 ouroboros = "0.15.5"
 chrono = { version = "0.4.23", features = ["serde"] }
 bcrypt = "0.13.0"
+validator = "0.16.0"
