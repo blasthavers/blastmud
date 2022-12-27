@@ -34,7 +34,7 @@ impl UserVerb for Verb {
             item_type: "player".to_owned(),
             item_code: username.to_lowercase(),
             display: username.to_owned(),
-            location: "room/chargen_room".to_owned(),
+            location: "room/repro_xv_chargen".to_owned(),
             ..Item::default()
         }).await?;
 

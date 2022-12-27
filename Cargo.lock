@@ -116,6 +116,7 @@ dependencies = [
  "log",
  "nix",
  "nom",
+ "once_cell",
  "ouroboros",
  "phf",
  "ring",
