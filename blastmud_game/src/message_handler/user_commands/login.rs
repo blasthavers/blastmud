@@ -1,4 +1,5 @@
 use super::{VerbContext, UserVerb, UserVerbRef, UResult, user_error};
+use super::look;
 use async_trait::async_trait;
 use tokio::time;
 
@@ -27,6 +28,7 @@ impl UserVerb for Verb {
         super::agree::check_and_notify_accepts(ctx).await?;
         if let Some(user) = ctx.user_dat {
             ctx.trans.save_user_model(user).await?;
+            look::VERB.handle(ctx, "look", "").await?;
         }
         
         Ok(())

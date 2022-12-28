@@ -257,6 +257,12 @@ impl DBTrans {
                       AND current_listener IS NOT NULL",
                      &[&"Logged in from another session\r\n", &username_l]).await?;
         self.pg_trans()?
+            .execute("INSERT INTO sendqueue (session, listener, message) \
+                      SELECT current_session, current_listener, null FROM users \
+                      WHERE username = $1 AND current_session IS NOT NULL \
+                      AND current_listener IS NOT NULL",
+                     &[&username_l]).await?;
+        self.pg_trans()?
             .execute("UPDATE users SET current_session = $1, current_listener = $2 WHERE username = $3",
                      &[&session.session as &(dyn ToSql + Sync), &session.listener, &username_l]).await?;
         Ok(())
