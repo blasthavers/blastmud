@@ -4,7 +4,7 @@ use crate::models::item::Item;
 use std::collections::{BTreeSet, BTreeMap};
 use log::info;
 
-mod room;
+pub mod room;
 
 pub struct StaticItem {
     pub item_code: &'static str,

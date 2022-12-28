@@ -284,6 +284,17 @@ impl DBTrans {
             &[&item_type, &item_code]).await?;
         Ok(())
     }
+
+    pub async fn find_item_by_type_code(self: &Self, item_type: &str, item_code: &str) ->
+        DResult<Option<Item>> {
+        if let Some(item) = self.pg_trans()?.query_opt(
+            "SELECT details FROM items WHERE \
+             details->>'item_type' = $1 AND \
+             details->>'item_code' = $2", &[&item_type, &item_code]).await? {
+          return Ok(serde_json::from_value(item.get("details"))?);
+        }
+        Ok(None)
+    }
     
     pub async fn commit(mut self: Self) -> DResult<()> {
         let trans_opt = self.with_trans_mut(|t| std::mem::replace(t, None));

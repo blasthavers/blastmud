@@ -23,10 +23,11 @@ pub fn zone_details() -> &'static BTreeMap<&'static str, Zone> {
         ).into_iter().map(|x|(x.code, x)).collect())
 }
 
+#[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Debug)]
 pub struct GridCoords {
-    x: i64,
-    y: i64,
-    z: i64
+    pub x: i64,
+    pub y: i64,
+    pub z: i64
 }
 
 pub enum ExitType {
@@ -66,6 +67,7 @@ pub struct Room {
     pub short: &'static str,
     pub grid_coords: GridCoords,
     pub description: &'static str,
+    pub description_less_explicit: Option<&'static str>,
     pub exits: Vec<Exit>
 }
 
@@ -76,19 +78,22 @@ pub fn room_list() -> &'static Vec<Room> {
             Room {
                 zone: "repro_xv",
                 code: "repro_xv_chargen",
-                name: "Choice Room",
+                name: ansi!("<yellow>Choice Room<reset>"),
                 short: ansi!("<green>CR<reset>"),
-                description: "A room brightly lit in unnaturally white light, covered in sparkling \
-                              white tiles from floor to \
-                              ceiling. A loudspeaker plays a message on loop:\r\n\
-                              \t\"Citizen, you are here because your memory has been wiped and you \
-                              are ready to start a fresh life. As a being enhanced by Gazos-Murlison \
-                              Co technology, the emperor has granted you the power to choose 14 points \
-                              of upgrades to yourself. Choose wisely, as it will impact who you end up \
-                              being, and you would need to completely wipe your brain again to change \
-                              them. Talk to Statbot to spend your 14 points and create your body.\"\r\n\
-                              [Try <bold>\"statbot hi<reset>, to send hi to statbot - the \" means to \
-                              whisper to a particular person in the room]",
+                description: ansi!(
+                    "A room brightly lit in unnaturally white light, covered in sparkling\n\
+                    white tiles from floor to ceiling. A loudspeaker plays a message on\n\
+                    loop:\r\n\
+                    \t<blue>\"Citizen, you are here because your memory has been wiped and\n\
+                    you are ready to start a fresh life. As a being enhanced by \
+                    Gazos-Murlison Co technology, the emperor has granted you the power \
+                    to choose 14 points of upgrades to yourself. Choose wisely, as it \
+                    will impact who you end up being, and you would need to completely \
+                    wipe your brain again to change them. Talk to Statbot to spend your \
+                    14 points and create your body.\"<reset>\n\
+                    [Try <bold>\"statbot hi<reset>, to send hi to statbot - the \" means \
+                    to whisper to a particular person in the room]"),
+                description_less_explicit: None,
                 grid_coords: GridCoords { x: 0, y: 0, z: 2 },
                 exits: vec!()
             },
@@ -101,6 +106,12 @@ pub fn room_map_by_code() -> &'static BTreeMap<&'static str, &'static Room> {
         || room_list().iter().map(|r| (r.code, r)).collect())
 }
 
+static STATIC_ROOM_MAP_BY_LOC: OnceCell<BTreeMap<&'static GridCoords, &'static Room>> = OnceCell::new();
+pub fn room_map_by_loc() -> &'static BTreeMap<&'static GridCoords, &'static Room> {
+    STATIC_ROOM_MAP_BY_LOC.get_or_init(
+        || room_list().iter().map(|r| (&r.grid_coords, r)).collect())
+}
+
 pub fn room_static_items() -> Box<dyn Iterator<Item = StaticItem>> {
     Box::new(room_list().iter().map(|r| StaticItem {
         item_code: r.code,
@@ -108,7 +119,7 @@ pub fn room_static_items() -> Box<dyn Iterator<Item = StaticItem>> {
             item_code: r.code.to_owned(),
             item_type: "room".to_owned(),
             display: r.description.to_owned(),
-            location: r.code.to_owned(),
+            location: format!("room/{}", r.code),
             is_static: true,
             ..Item::default()
         })

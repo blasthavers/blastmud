@@ -72,6 +72,14 @@ static REGISTERED_COMMANDS: UserVerbRegistry = phf_map! {
     "look" => look::VERB,
 };
 
+pub fn explicit_if_allowed<'l>(ctx: &VerbContext, explicit: &'l str, non_explicit: Option<&'l str>) -> &'l str {
+    if ctx.session_dat.less_explicit_mode {
+        non_explicit.unwrap_or(explicit)
+    } else {
+        explicit
+    }
+}
+
 fn resolve_handler(ctx: &VerbContext, cmd: &str) -> Option<&'static UserVerbRef> {
     let mut result = ALWAYS_AVAILABLE_COMMANDS.get(cmd);
 

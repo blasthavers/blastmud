@@ -20,6 +20,24 @@ struct AnsiState {
     strike: bool,
 }
 
+impl AnsiState {
+    fn restore_ansi(self: &Self) -> String {
+        let mut buf = String::new();
+        if !(self.bold && self.underline && self.strike &&
+              self.background != 0 && self.foreground != 0) {
+            buf.push_str(ansi!("<reset>"));
+        }
+        if self.bold { buf.push_str(ansi!("<bold>")); }
+        if self.underline { buf.push_str(ansi!("<under>")); }
+        if self.strike { buf.push_str(ansi!("<strike>")); }
+        if self.background != 0 {
+            buf.push_str(&format!("\x1b[{}m", 39 + self.background)); }
+        if self.foreground != 0 {
+            buf.push_str(&format!("\x1b[{}m", 29 + self.foreground)); }
+        buf
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 struct AnsiEvent<'l> (
     AnsiParseToken<'l>,
@@ -187,9 +205,113 @@ pub fn limit_special_characters(input: &str) -> String {
 
 /// Flows a second column around a first column, limiting the width of both
 /// columns as specified, and adding a gutter.
-pub fn flow_around(col1: &str, col1_width: u64, gutter: &str,
-                   col2: &str, col2_width: u64) -> String {
-    "not yet".to_owned()
+pub fn flow_around(col1: &str, col1_width: usize, gutter: &str,
+                   col2: &str, col2_width: usize) -> String {
+    let mut it1 = AnsiIterator::new(col1).peekable();
+    let mut it2 = AnsiIterator::new(col2).peekable();
+
+    let mut buf = String::new();
+
+    // Phase 1: col1 still has data, so flow col2 around col1.
+    'around_rows: loop {
+        match it1.peek() {
+            None => break 'around_rows,
+            Some(AnsiEvent(_, st)) => buf.push_str(&st.restore_ansi())
+        }
+        let mut fill_needed: usize = 0;
+        let mut skip_nl = true;
+        'col_data: for i in 0..col1_width {
+            'until_move_forward: loop {
+                match it1.next() {
+                    None | Some(AnsiEvent(AnsiParseToken::Newline, _)) => {
+                        fill_needed = col1_width - i;
+                        skip_nl = false;
+                        break 'col_data;
+                    }
+                    Some(AnsiEvent(AnsiParseToken::Character(c), _)) => {
+                        buf.push(c);
+                        break 'until_move_forward;
+                    }
+                    Some(AnsiEvent(AnsiParseToken::ControlSeq(s), _)) => {
+                        buf.push_str(s);
+                    }
+                }
+            }
+        }
+        // If there is a newline (optionally preceded by 1+ control characters),
+        // and we didn't just read one, we should skip it, since we broke to a
+        // new line anyway. It is safe to eat any control characters since we will
+        // restore_ansi() anyway.
+        if skip_nl {
+            loop {
+                match it1.peek() {
+                    None => break,
+                    Some(AnsiEvent(AnsiParseToken::Character(_), _)) => break,
+                    Some(AnsiEvent(AnsiParseToken::ControlSeq(s), _)) => {
+                        if fill_needed > 0 { buf.push_str(s); }
+                        it1.next();
+                    }
+                    Some(AnsiEvent(AnsiParseToken::Newline, _)) => {
+                        it1.next();
+                        break;
+                    }
+                }
+            }
+        }
+        for _ in 0..fill_needed { buf.push(' '); }
+
+        buf.push_str(gutter);
+
+        if let Some(AnsiEvent(_, st)) = it2.peek() {
+            buf.push_str(&st.restore_ansi())
+        }
+        skip_nl = true;
+        'col_data: for _ in 0..col2_width {
+            'until_move_forward: loop {
+                match it2.next() {
+                    None | Some(AnsiEvent(AnsiParseToken::Newline, _)) => {
+                        skip_nl = false;
+                        break 'col_data;
+                    }
+                    Some(AnsiEvent(AnsiParseToken::Character(c), _)) => {
+                        buf.push(c);
+                        break 'until_move_forward;
+                    }
+                    Some(AnsiEvent(AnsiParseToken::ControlSeq(s), _)) => {
+                        buf.push_str(s);
+                    }
+                }
+            }
+        }
+        if skip_nl {
+            loop {
+                match it2.peek() {
+                    None => break,
+                    Some(AnsiEvent(AnsiParseToken::Character(_), _)) => break,
+                    Some(AnsiEvent(AnsiParseToken::ControlSeq(s), _)) => {
+                        if fill_needed > 0 { buf.push_str(s); }
+                        it2.next();
+                    }
+                    Some(AnsiEvent(AnsiParseToken::Newline, _)) => {
+                        it2.next();
+                        break;
+                    }
+                }
+            }
+        }
+        buf.push('\n');
+    }
+
+    // Now just copy anything left in it2 over.
+    for AnsiEvent(e, _) in it2 {
+        match e {
+            AnsiParseToken::Character(c) => buf.push(c),
+            AnsiParseToken::Newline => buf.push('\n'),
+            AnsiParseToken::ControlSeq(t) => buf.push_str(t)
+        }
+    }
+    
+    buf
 }
 
 #[cfg(test)]
@@ -224,6 +346,38 @@ mod test {
                    ansi!("a<bgred><green>b<bggreen><red>c<reset>d"));
         assert_eq!(limit_special_characters("Test\x1b[5;5fing"),
                    "Test5fing");
+    }
+
+    #[test]
+    fn flow_around_works_for_plain_text() {
+        let str1 = "  /\\  /\\\n\
+                    /--------\\\n\
+                    | ()  () |\n\
+                    |        |\n\
+                    |   /\\   |\n\
+                    | \\    / |\n\
+                    | -(--)- |\n\
+                    | /    \\ |\n\
+                    \\--------/\n\
+                    A very poor rendition of a cat! Meow.";
+        let str2 = "Hello world, this is the second column for this test. It starts with a rather long line that will wrap.\n\
+                    And here is a shorter line.\n\
+                    All of this should by nicely wrapped, even if it is exactly the len\n\
+                    gth of column 2!\n\
+                    \n\
+                    But double newlines should come up as blank lines.\n\
+                    Blah\n\
+                    Blah\n\
+                    Blah\n\
+                    Blah\n\
+                    Blah\n\
+                    Blah\n\
+                    Blah\n\
+                    And once we get to the bottom of column 1, column 2 should just get written\n\
+                    out normally, not in the previous column.";
+        // This has a lot of unnecessary resets, but that is expected with the algorithm right now.
+        let expected = "\u{1b}[0m  /\\  /\\   | \u{1b}[0mHello world, this is the second column for this test. It starts wit\n\u{1b}[0m/--------\\ | \u{1b}[0mh a rather long line that will wrap.\n\u{1b}[0m| ()  () | | \u{1b}[0mAnd here is a shorter line.\n\u{1b}[0m|        | | \u{1b}[0mAll of this should by nicely wrapped, even if it is exactly the len\n\u{1b}[0m|   /\\   | | \u{1b}[0mgth of column 2!\n\u{1b}[0m| \\    / | | \u{1b}[0m\n\u{1b}[0m| -(--)- | | \u{1b}[0mBut double newlines should come up as blank lines.\n\u{1b}[0m| /    \\ | | \u{1b}[0mBlah\n\u{1b}[0m\\--------/ | \u{1b}[0mBlah\n\u{1b}[0mA very poo | \u{1b}[0mBlah\n\u{1b}[0mr renditio | \u{1b}[0mBlah\n\u{1b}[0mn of a cat | \u{1b}[0mBlah\n\u{1b}[0m! Meow.    | \u{1b}[0mBlah\nBlah\nAnd once we get to the bottom of column 1, column 2 should just get written\nout normally, not in the previous column.";
+        assert_eq!(flow_around(str1, 10, " | ", str2, 67), expected);
     }
     
 }
