@@ -1,7 +1,7 @@
 use crate::message_handler::ListenerSession;
 use crate::DResult;
 use crate::db::DBPool;
-use ansi_macro::ansi;
+use ansi::ansi;
 use std::default::Default;
 use crate::models::session::Session;
 

@@ -3,7 +3,7 @@ use super::{
     CommandHandlingError::UserError
 };
 use async_trait::async_trait;
-use ansi_macro::ansi;
+use ansi::ansi;
 use phf::phf_map;
 
 static ALWAYS_HELP_PAGES: phf::Map<&'static str, &'static str> = phf_map! {

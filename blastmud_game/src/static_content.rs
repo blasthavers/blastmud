@@ -1,7 +1,6 @@
 use crate::DResult;
 use crate::db::DBPool;
 use crate::models::item::Item;
-use itertools::Itertools;
 use std::collections::{BTreeSet, BTreeMap};
 use log::info;
 
@@ -69,6 +68,7 @@ pub async fn refresh_static_content(pool: &DBPool) -> DResult<()> {
 
 #[cfg(test)]
 mod test {
+    use itertools::Itertools;
     use super::*;
 
     #[test]

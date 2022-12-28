@@ -1,7 +1,7 @@
 use super::StaticItem;
 use once_cell::sync::OnceCell;
 use std::collections::BTreeMap;
-use ansi_macro::ansi;
+use ansi::ansi;
 use crate::models::item::Item;
 
 pub struct Zone {

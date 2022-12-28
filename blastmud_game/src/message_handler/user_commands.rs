@@ -1,20 +1,21 @@
 use super::ListenerSession;
 use crate::DResult;
 use crate::db::{DBTrans, DBPool};
-use ansi_macro::ansi;
+use ansi::ansi;
 use phf::phf_map;
 use async_trait::async_trait;
 use crate::models::{session::Session, user::User};
 use log::warn;
 
-mod parsing;
-mod ignore;
-mod help;
-mod quit;
-mod less_explicit_mode;
-mod register;
 mod agree;
+mod help;
+mod ignore;
+mod less_explicit_mode;
 mod login;
+mod look;
+mod parsing;
+mod quit;
+mod register;
 
 pub struct VerbContext<'l> {
     session: &'l ListenerSession,
@@ -59,14 +60,16 @@ static ALWAYS_AVAILABLE_COMMANDS: UserVerbRegistry = phf_map! {
 };
 
 static UNREGISTERED_COMMANDS: UserVerbRegistry = phf_map! {
-    "less_explicit_mode" => less_explicit_mode::VERB,
-    "register" => register::VERB,
-    "login" => login::VERB,
+    "agree" => agree::VERB,
     "connect" => login::VERB,
-    "agree" => agree::VERB
+    "less_explicit_mode" => less_explicit_mode::VERB,
+    "login" => login::VERB,
+    "register" => register::VERB,
 };
 
 static REGISTERED_COMMANDS: UserVerbRegistry = phf_map! {
+    "l" => look::VERB,
+    "look" => look::VERB,
 };
 
 fn resolve_handler(ctx: &VerbContext, cmd: &str) -> Option<&'static UserVerbRef> {

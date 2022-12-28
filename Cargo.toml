@@ -4,4 +4,6 @@ members = [
   "blastmud_listener",
   "blastmud_interfaces",
   "blastmud_game",
+  "ansi_macro",
+  "ansi",
 ]

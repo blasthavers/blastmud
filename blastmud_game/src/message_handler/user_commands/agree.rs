@@ -1,7 +1,7 @@
 use super::{VerbContext, UserVerb, UserVerbRef, UResult, user_error};
 use crate::models::user::{User, UserTermData};
 use async_trait::async_trait;
-use ansi_macro::ansi;
+use ansi::ansi;
 use chrono::Utc;
 
 pub struct Verb;
