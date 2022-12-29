@@ -81,10 +81,10 @@ pub fn room_list() -> &'static Vec<Room> {
                 name: ansi!("<yellow>Choice Room<reset>"),
                 short: ansi!("<green>CR<reset>"),
                 description: ansi!(
-                    "A room brightly lit in unnaturally white light, covered in sparkling\n\
-                    white tiles from floor to ceiling. A loudspeaker plays a message on\n\
-                    loop:\r\n\
-                    \t<blue>\"Citizen, you are here because your memory has been wiped and\n\
+                    "A room brightly lit in unnaturally white light, covered in sparkling \
+                    white tiles from floor to ceiling. A loudspeaker plays a message on \
+                    loop:\n\
+                    \t<blue>\"Citizen, you are here because your memory has been wiped and \
                     you are ready to start a fresh life. As a being enhanced by \
                     Gazos-Murlison Co technology, the emperor has granted you the power \
                     to choose 14 points of upgrades to yourself. Choose wisely, as it \

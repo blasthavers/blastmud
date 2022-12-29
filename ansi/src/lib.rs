@@ -12,7 +12,6 @@ pub fn ignore_special_characters(input: &str) -> String {
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 struct AnsiState {
-    col: u64,
     background: u64, // 0 means default.
     foreground: u64,
     bold: bool,
@@ -70,7 +69,6 @@ impl AnsiIterator<'_> {
         AnsiIterator { underlying: input.chars().enumerate(),
                        input: input,
                        state: Rc::new(AnsiState {
-                           col: 0,
                            background: 0,
                            foreground: 0,
                            bold: false,
@@ -88,7 +86,6 @@ impl <'l>Iterator for AnsiIterator<'l> {
 
     fn next(self: &mut Self) -> Option<AnsiEvent<'l>> {
         if self.pending_col {
-            Rc::make_mut(&mut self.state).col += 1;
             self.pending_col = false;
         }
         if self.inject_spaces > 0 {
@@ -98,7 +95,6 @@ impl <'l>Iterator for AnsiIterator<'l> {
         }
         while let Some((i0, c)) = self.underlying.next() {
             if c == '\n' {
-                Rc::make_mut(&mut self.state).col = 0; 
                 return Some(AnsiEvent::<'l>(AnsiParseToken::Newline, self.state.clone()));
             } else if c == '\t' {
                 for _ in 0..4 {
@@ -314,6 +310,132 @@ pub fn flow_around(col1: &str, col1_width: usize, gutter: &str,
     buf
 }
 
+fn is_wrappable(c: char) -> bool {
+    c == ' ' || c == '-'
+}
+
+pub fn word_wrap<F>(input: &str, limit: F) -> String
+    where F: Fn(usize) -> usize {
+    let mut it_main = AnsiIterator::new(input);
+    let mut start_word = true;
+    let mut row: usize = 0;
+    let mut col: usize = 0;
+    let mut buf: String = String::new();
+
+    loop {
+        let ev = it_main.next();
+        match ev {
+            None => break,
+            Some(AnsiEvent(AnsiParseToken::Character(c), _)) => {
+                col += 1;
+                if is_wrappable(c) {
+                    start_word = true;
+                    if col < limit(row) || (col == limit(row) && c != ' ') {
+                        buf.push(c);
+                    }
+                    if col == limit(row) {
+                        let mut it_lookahead = it_main.clone();
+                        let fits = 'check_fits: loop {
+                            match it_lookahead.next() {
+                                None => break 'check_fits true,
+                                Some(AnsiEvent(AnsiParseToken::Newline, _)) => break 'check_fits true,
+                                Some(AnsiEvent(AnsiParseToken::Character(c), _)) =>
+                                    break 'check_fits is_wrappable(c),
+                                _ => {}
+                            }
+                        };
+                        if !fits {
+                            buf.push('\n');
+                            row += 1;
+                            col = 0;
+                        }
+                    } else if col > limit(row) {
+                        buf.push('\n');
+                        row += 1;
+                        if c == ' ' {
+                            col = 0;
+                        } else {
+                            buf.push(c);
+                            col = 1;
+                        }
+                    }
+                    continue;
+                }
+                assert!(col <= limit(row),
+                        "col must be below limit, but found c={}, col={}, limit={}",
+                        c, col, limit(row));
+                if !start_word {
+                    if col == limit(row) {
+                        // We are about to hit the limit, and we need to decide
+                        // if we save it for a hyphen or just push the char.
+                        let mut it_lookahead = it_main.clone();
+                        let fits = 'check_fits: loop {
+                            match it_lookahead.next() {
+                                None => break 'check_fits true,
+                                Some(AnsiEvent(AnsiParseToken::Newline, _)) => break 'check_fits true,
+                                Some(AnsiEvent(AnsiParseToken::Character(c), _)) =>
+                                    break 'check_fits is_wrappable(c),
+                                _ => {}
+                            }
+                        };
+                        if fits {
+                            buf.push(c);
+                        } else {
+                            buf.push('-');
+                            buf.push('\n');
+                            row += 1;
+                            col = 1;
+                            buf.push(c);
+                        }
+                        continue;
+                    }
+                    buf.push(c);
+                    continue;
+                }
+                start_word = false;
+                // We are about to start a word. Do we start the word, wrap, or
+                // hyphenate?
+                let it_lookahead = it_main.clone();
+                let mut wordlen = 0;
+                'lookahead: for AnsiEvent(e, _) in it_lookahead {
+                    match e {
+                        AnsiParseToken::ControlSeq(_) => {}
+                        AnsiParseToken::Character(c) if !is_wrappable(c) => {
+                            wordlen += 1;
+                        }
+                        AnsiParseToken::Character(c) if c == '-' => {
+                            // Hyphens are special. The hyphen has to fit before
+                            // we break the word.
+                            wordlen += 1;
+                            break 'lookahead;
+                        }
+                        _ => break 'lookahead,
+                    }
+                }
+                // Note we already increased col.
+                if wordlen < limit(row) + 1 - col || (wordlen > limit(row) && col != limit(row)) {
+                    buf.push(c);
+                    continue;
+                }
+                // So we can't hyphenate or fit it, let's break now.
+                buf.push('\n');
+                row += 1;
+                col = 1;
+                buf.push(c);
+            }
+            Some(AnsiEvent(AnsiParseToken::Newline, _)) => {
+                col = 0;
+                row += 1;
+                buf.push('\n');
+                start_word = true;
+            }
+            Some(AnsiEvent(AnsiParseToken::ControlSeq(t), _)) => buf.push_str(t)
+        }
+    }
+
+    buf
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -378,6 +500,42 @@ mod test {
         // This has a lot of unnecessary resets, but that is expected with the algorithm right now.
         let expected = "\u{1b}[0m  /\\  /\\   | \u{1b}[0mHello world, this is the second column for this test. It starts wit\n\u{1b}[0m/--------\\ | \u{1b}[0mh a rather long line that will wrap.\n\u{1b}[0m| ()  () | | \u{1b}[0mAnd here is a shorter line.\n\u{1b}[0m|        | | \u{1b}[0mAll of this should by nicely wrapped, even if it is exactly the len\n\u{1b}[0m|   /\\   | | \u{1b}[0mgth of column 2!\n\u{1b}[0m| \\    / | | \u{1b}[0m\n\u{1b}[0m| -(--)- | | \u{1b}[0mBut double newlines should come up as blank lines.\n\u{1b}[0m| /    \\ | | \u{1b}[0mBlah\n\u{1b}[0m\\--------/ | \u{1b}[0mBlah\n\u{1b}[0mA very poo | \u{1b}[0mBlah\n\u{1b}[0mr renditio | \u{1b}[0mBlah\n\u{1b}[0mn of a cat | \u{1b}[0mBlah\n\u{1b}[0m! Meow.    | \u{1b}[0mBlah\nBlah\nAnd once we get to the bottom of column 1, column 2 should just get written\nout normally, not in the previous column.";
         assert_eq!(flow_around(str1, 10, " | ", str2, 67), expected);
+    }
+
+    #[test]
+    fn word_wrap_works_on_long_text() {
+        let unwrapped = "Hello, this is a very long passage of text that needs to be wrapped. Some words are superduperlong! There are some new\nlines in it though!\nLet's try manuallya-hyphenating.\nManually-hyphenating\nOneverylongrunonwordthatjustkeepsgoing.\n - -- --- - -- -  - - -testing";
+        let wrapped = "Hello, \n\
+                      this is a\n\
+                      very long\n\
+                      passage of\n\
+                      text that\n\
+                      needs to \n\
+                      be \n\
+                      wrapped. \n\
+                      Some words\n\
+                      are super-\n\
+                      duperlong!\n\
+                      There are\n\
+                      some new\n\
+                      lines in \n\
+                      it though!\n\
+                      Let's try\n\
+                      manuallya-\n\
+                      hyphenati-\n\
+                      ng.\n\
+                      Manually-\n\
+                      hyphenati-\n\
+                      ng\n\
+                      Oneverylo-\n\
+                      ngrunonwo-\n\
+                      rdthatjus-\n\
+                      tkeepsgoi-\n\
+                      ng.\n \
+                      - -- ---\n\
+                      - -- -  -\n\
+                      - -testing";
+        assert_eq!(word_wrap(unwrapped, |_| 10), wrapped);
     }
     
 }

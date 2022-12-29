@@ -1,6 +1,6 @@
 use super::{VerbContext, UserVerb, UserVerbRef, UResult, UserError, explicit_if_allowed};
 use async_trait::async_trait;
-use ansi::{ansi, flow_around};
+use ansi::{ansi, flow_around, word_wrap};
 use crate::models::{user::User, item::Item};
 use crate::static_content::room;
 
@@ -55,8 +55,11 @@ pub async fn describe_room(ctx: &VerbContext<'_>, room: &room::Room) -> UResult<
         ctx.session,
         Some(&flow_around(&render_map(room, 5, 5), 10, "  ",
                           &format!("{} ({})\n{}\n", room.name, zone,
-                                   explicit_if_allowed(ctx, room.description,
-                                                       room.description_less_explicit)), 68))
+                                   word_wrap(
+                                       explicit_if_allowed(ctx, room.description,
+                                                           room.description_less_explicit),
+                                       |row| if row >= 5 { 80 } else { 68 }
+                                   )), 68))
     ).await?;
     Ok(())
 }
