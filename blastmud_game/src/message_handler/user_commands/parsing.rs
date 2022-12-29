@@ -1,6 +1,6 @@
 use nom::{
     bytes::complete::{take_till1, take_while},
-    character::{complete::{space0, space1, alpha1}},
+    character::{complete::{space0, space1, alpha1, one_of}},
     combinator::{recognize, fail, eof},
     sequence::terminated,
     branch::alt,
@@ -11,7 +11,10 @@ use nom::{
 pub fn parse_command_name(input: &str) -> (&str, &str) {
     fn parse(input: &str) -> IResult<&str, &str> {
         let (input, _) = space0(input)?;
-        let (input, cmd) = take_till1(|c| c == ' ' || c == '\t')(input)?;
+        let (input, cmd) = alt((
+            recognize(one_of("-\"':.")),
+            take_till1(|c| c == ' ' || c == '\t')
+        ))(input)?;
         let (input, _) = space0(input)?;
         Ok((input, cmd))
     }

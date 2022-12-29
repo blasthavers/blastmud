@@ -46,6 +46,8 @@ pub struct Item {
     pub item_type: String,
     pub display: String,
     pub display_less_explicit: Option<String>,
+    pub details: Option<String>,
+    pub details_less_explicit: Option<String>,
     pub location: String, // Item reference as item_type/item_code.
     pub action_type: LocationActionType,
     pub presence_target: Option<String>, // e.g. what are they sitting on.
@@ -64,6 +66,8 @@ impl Default for Item {
             item_type: "unset".to_owned(),
             display: "Item".to_owned(),
             display_less_explicit: None,
+            details: None,
+            details_less_explicit: None,
             location: "room/storage".to_owned(),
             action_type: LocationActionType::Normal,
             presence_target: None,
