@@ -12,7 +12,7 @@ use crate::models::{session::Session, user::User, item::Item};
 use tokio_postgres::types::ToSql;
 use std::collections::BTreeSet;
 
-use serde_json;
+use serde_json::{self, Value};
 use futures::FutureExt;
 
 #[derive(Clone, Debug)]
@@ -227,7 +227,29 @@ impl DBTrans {
                                    &[&serde_json::to_value(item)?]).await?
            .get("item_id"))
     }
-    
+
+    pub async fn limited_update_static_item(self: &Self, item: &Item) -> DResult<()> {
+        let value = serde_json::to_value(item)?;
+        let obj_map = value.as_object()
+            .expect("Static item to be object in JSON");
+        let mut params: Vec<&(dyn ToSql + Sync)> = vec!(&item.item_type, &item.item_code);
+        let mut det_ex: String = "details".to_owned();
+        let mut var_id = 3;
+        // Only copy more permanent fields, others are supposed to change over time and shouldn't
+        // be reset on restart.
+        for to_copy in ["display", "display_less_explicit", "details", "details_less_explicit",
+                        "total_xp", "total_stats", "total_skills"] {
+            det_ex = format!("jsonb_set({}, '{{{}}}', ${})", det_ex, to_copy, var_id);
+            params.push(obj_map.get(to_copy).unwrap_or(&Value::Null));
+            var_id += 1;
+        }
+        self.pg_trans()?.execute(
+            &("UPDATE items SET details = ".to_owned() + &det_ex +
+              " WHERE details->>'item_type' = $1 AND details->>'item_code' = $2"),
+            &params).await?;
+        Ok(())
+    }
+
     pub async fn create_user(self: &Self, session: &ListenerSession, user_dat: &User) -> DResult<()> {
         self.pg_trans()?.execute("INSERT INTO users (\
               username, current_session, current_listener, details\

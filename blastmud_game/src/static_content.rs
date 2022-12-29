@@ -5,6 +5,7 @@ use std::collections::{BTreeSet, BTreeMap};
 use log::info;
 
 pub mod room;
+pub mod npc;
 
 pub struct StaticItem {
     pub item_code: &'static str,
@@ -21,7 +22,7 @@ fn static_item_registry() -> Vec<StaticItemTypeGroup> {
         // Must have no duplicates.
         StaticItemTypeGroup {
             item_type: "npc",
-            items: || Box::new(vec!().into_iter())
+            items: || npc::npc_static_items()
         },
         StaticItemTypeGroup {
             item_type: "room",
@@ -54,6 +55,11 @@ async fn refresh_static_items(pool: &DBPool) -> DResult<()> {
         for new_item_code in expected_set.difference(&existing_items) {
             tx.create_item(&(expected_items.get(new_item_code)
                              .unwrap().initial_item)()).await?;
+        }
+        for existing_item_code in expected_set.intersection(&existing_items) {
+            tx.limited_update_static_item(
+                &(expected_items.get(existing_item_code)
+                  .unwrap().initial_item)()).await?;
         }
         tx.commit().await?;
         info!("Committed any changes for static_content of item_type {}", type_group.item_type);
