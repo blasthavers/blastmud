@@ -144,7 +144,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     will impact who you end up being, and you would need to completely \
                     wipe your brain again to change them. Talk to Statbot to spend your \
                     14 points and create your body.\"<reset>\n\
-                    [Try <bold>\"statbot hi<reset>, to send hi to statbot - the \" means \
+                    [Try <bold>-statbot hi<reset>, to send hi to statbot - the - means \
                     to whisper to a particular person in the room]"),
                 description_less_explicit: None,
                 grid_coords: GridCoords { x: 0, y: 0, z: 1 },

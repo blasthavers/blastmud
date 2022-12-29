@@ -27,28 +27,34 @@ fn start_session_cleanup_task(pool: db::DBPool) {
 }
 
 async fn process_sendqueue_once(pool: db::DBPool, listener_map: ListenerMap) -> DResult<()> {
-    for item in pool.get_from_sendqueue().await? {
-        match listener_map.lock().await.get(&item.session.listener).map(|l| l.clone()) {
-            None => {}
-            Some(listener_sender) => {
-                let (tx, rx) = oneshot::channel();
-                listener_sender.send(
-                    ListenerSend {
-                        message: match item.message.clone() {
-                            None => MessageToListener::DisconnectSession {
-                                session: item.session.session.clone()
+    loop {
+        let q = pool.get_from_sendqueue().await?;
+        for item in &q {
+            match listener_map.lock().await.get(&item.session.listener).map(|l| l.clone()) {
+                None => {}
+                Some(listener_sender) => {
+                    let (tx, rx) = oneshot::channel();
+                    listener_sender.send(
+                        ListenerSend {
+                            message: match item.message.clone() {
+                                None => MessageToListener::DisconnectSession {
+                                    session: item.session.session.clone()
+                                },
+                                Some(msg) => MessageToListener::SendToSession {
+                                    session: item.session.session.clone(),
+                                    msg: msg
+                                }
                             },
-                            Some(msg) => MessageToListener::SendToSession {
-                                session: item.session.session.clone(),
-                                msg: msg
-                            }
-                        },
-                        ack_notify: tx
-                    }
-                ).await.unwrap_or(());
-                rx.await.unwrap_or(());
-                pool.delete_from_sendqueue(&item).await?;
+                            ack_notify: tx
+                        }
+                    ).await.unwrap_or(());
+                    rx.await.unwrap_or(());
+                    pool.delete_from_sendqueue(&item).await?;
+                }
             }
+        }
+        if q.len() <= 9 {
+            break;
         }
     }
     Ok(())

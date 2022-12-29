@@ -301,6 +301,16 @@ impl DBTrans {
         }
         Ok(None)
     }
+
+    pub async fn find_items_by_location(self: &Self, location: &str) -> DResult<Vec<Item>> {
+        Ok(self.pg_trans()?.query(
+            "SELECT details FROM items WHERE details->>'location' = $1 \
+             LIMIT 20", &[&location]
+        ).await?.into_iter()
+           .filter_map(|i| serde_json::from_value(i.get("details")).ok())
+           .collect())
+        
+    }
     
     pub async fn commit(mut self: Self) -> DResult<()> {
         let trans_opt = self.with_trans_mut(|t| std::mem::replace(t, None));

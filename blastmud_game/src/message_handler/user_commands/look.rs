@@ -1,8 +1,9 @@
 use super::{VerbContext, UserVerb, UserVerbRef, UResult, UserError, user_error, explicit_if_allowed};
 use async_trait::async_trait;
 use ansi::{ansi, flow_around, word_wrap};
-use crate::models::{user::User, item::Item};
+use crate::models::{user::User, item::{Item, LocationActionType, Subattack}};
 use crate::static_content::room::{self, Direction};
+use itertools::Itertools;
 
 pub fn get_user_or_fail<'l>(ctx: &'l VerbContext) -> UResult<&'l User> { 
     ctx.user_dat.as_ref()
@@ -62,18 +63,80 @@ fn exits_for(room: &room::Room) -> String {
     format!(ansi!("<cyan>[ Exits: <bold>{} <reset><cyan>]<reset>"), exit_text.join(" "))
 }
 
-pub async fn describe_room(ctx: &VerbContext<'_>, room: &room::Room) -> UResult<()> {
+pub async fn describe_room(ctx: &VerbContext<'_>, room: &room::Room, contents: &str) -> UResult<()> {
     let zone = room::zone_details().get(room.zone).map(|z|z.display).unwrap_or("Outside of time");
     ctx.trans.queue_for_session(
         ctx.session,
         Some(&flow_around(&render_map(room, 5, 5), 10, "  ",
-                          &word_wrap(&format!("{} ({})\n{}\n{}\n", room.name, zone,
+                          &word_wrap(&format!("{} ({})\n{}.{}\n{}\n", room.name, zone,
                                               explicit_if_allowed(ctx, room.description,
                                                                   room.description_less_explicit),
-                                              exits_for(room)),
+                                              contents, exits_for(room)),
                                      |row| if row >= 5 { 80 } else { 68 }), 68))
     ).await?;
     Ok(())
+}
+
+async fn list_item_contents<'l>(ctx: &'l VerbContext<'_>, item: &'l Item) -> UResult<String> {
+    let mut buf = String::new();
+    let mut items = ctx.trans.find_items_by_location(&format!("{}/{}",
+                                                          item.item_type, item.item_code)).await?;
+    items.sort_unstable_by(|it1, it2| (&it1.display).cmp(&it2.display));
+
+    let all_groups: Vec<Vec<&Item>> = items
+        .iter()
+        .group_by(|i| &i.display)
+        .into_iter()
+        .map(|(_, g)|g.collect::<Vec<&Item>>())
+        .collect::<Vec<Vec<&Item>>>();
+    
+    for group_items in all_groups {
+        let head = &group_items[0];
+        let is_creature = head.item_type == "player" || head.item_type.starts_with("npc");
+        buf.push(' ');
+        if group_items.len() > 1 {
+            buf.push_str(&format!("{} ", group_items.len()))
+        } else if !is_creature {
+            buf.push_str("A ");
+        }
+        buf.push_str(
+            &explicit_if_allowed(ctx,
+                                 &head.display,
+                                 head.display_less_explicit.as_ref().map(|v|&**v)));
+        buf.push_str(" is ");
+        match head.action_type {
+            LocationActionType::Sitting => buf.push_str("sitting "),
+            LocationActionType::Reclining => buf.push_str("reclining "),
+            _ => {}
+        }
+        buf.push_str("here");
+        if let LocationActionType::Attacking(subattack) = &head.action_type {
+            match subattack {
+                Subattack::Powerattacking => buf.push_str(", powerattacking "),
+                Subattack::Feinting => buf.push_str(", feinting "),
+                Subattack::Grabbing => buf.push_str(", grabbing "),
+                Subattack::Wrestling => buf.push_str(", wrestling "),
+                _ => buf.push_str(", attacking ")
+            }
+            match &head.presence_target {
+                None => buf.push_str("someone"),
+                Some(who) => match who.split_once("/") {
+                    None => buf.push_str("someone"),
+                    Some((ttype, tcode)) =>
+                        match ctx.trans.find_item_by_type_code(ttype, tcode).await? {
+                            None => buf.push_str("someone"),
+                            Some(it) => buf.push_str(
+                                &explicit_if_allowed(ctx,
+                                                     &it.display,
+                                                     it.display_less_explicit.as_ref().map(|v|&**v))
+                            )
+                        }
+                }
+            }
+        }
+        buf.push('.');
+    }
+    Ok(buf)
 }
 
 pub struct Verb;
@@ -107,14 +170,14 @@ impl UserVerb for Verb {
         } else {
             user_error("Sorry, I don't understand what you want to look at.".to_owned())
         }?;
+        let item = ctx.trans.find_item_by_type_code(itype, icode).await?
+            .ok_or_else(|| UserError("Sorry, that no longer exists".to_owned()))?;
         if itype != "room" {
-            let item = ctx.trans.find_item_by_type_code(itype, icode).await?
-                .ok_or_else(|| UserError("Sorry, that no longer exists".to_owned()))?;
             describe_normal_item(ctx, &item).await?;
         } else {
             let room =
                 room::room_map_by_code().get(icode).ok_or_else(|| UserError("Sorry, that room no longer exists".to_owned()))?;
-            describe_room(ctx, &room).await?;
+            describe_room(ctx, &room, &list_item_contents(ctx, &item).await?).await?;
         }
         Ok(())
     }
