@@ -333,6 +333,66 @@ impl DBTrans {
            .collect())
         
     }
+
+    pub async fn resolve_items_by_display_name_for_player(
+        self: &Self,
+        from_item: &Item,
+        query: &str,
+        include_contents: bool,
+        include_loc_contents: bool,
+        include_active_players: bool,
+        include_all_players: bool
+    ) -> DResult<Vec<Item>> {
+        let mut ctes: Vec<String> = Vec::new();
+        let mut include_tables: Vec<&'static str> = Vec::new();
+
+        let player_loc = &from_item.location;
+        let player_desig = format!("{}/{}", from_item.item_type,
+                                   from_item.item_code);
+        if include_contents {
+            ctes.push("contents AS (\
+                         SELECT details FROM items WHERE details->>'location' = $1
+                      )".to_owned());
+            include_tables.push("SELECT details FROM contents");
+        }
+        if include_loc_contents {
+            ctes.push("loc_contents AS (\
+                         SELECT details FROM items WHERE details->>'location' = $2
+                      )".to_owned());
+            include_tables.push("SELECT details FROM loc_contents");
+        }
+        if include_active_players {
+            ctes.push("active_players AS (\
+                         SELECT details FROM items WHERE details->>'item_type' = 'player' \
+                                        AND current_session IS NOT NULL \
+                      )".to_owned());
+            include_tables.push("SELECT details FROM active_players");
+        }
+        if include_all_players {
+            ctes.push("all_players AS (\
+                         SELECT details FROM items WHERE details->>'item_type' = 'player'
+                      )".to_owned());
+            include_tables.push("SELECT details FROM all_players");
+        }
+        ctes.push(format!("relevant_items AS ({})", include_tables.join(" UNION ")));
+
+        let cte_str: String = ctes.join(", ");
+        
+        Ok(self.pg_trans()?.query(
+            &format!(
+                "WITH {} SELECT details FROM relevant_items WHERE (lower(details->>'display') LIKE $3) \
+                 OR (lower(details ->>'display_less_explicit') LIKE $3) \
+                 ORDER BY length(details->>'display') DESC \
+                 LIMIT 2", &cte_str),
+            &[&player_desig, &player_loc,
+              &(query.replace("\\", "\\\\")
+                .replace("_", "\\_")
+                .replace("%", "")
+                .to_lowercase() + "%")]
+        ).await?.into_iter()
+           .filter_map(|i| serde_json::from_value(i.get("details")).ok())
+           .collect())
+    }
     
     pub async fn commit(mut self: Self) -> DResult<()> {
         let trans_opt = self.with_trans_mut(|t| std::mem::replace(t, None));

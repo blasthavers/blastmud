@@ -24,7 +24,9 @@ CREATE TABLE items (
 CREATE UNIQUE INDEX item_index ON items ((details->>'item_type'), (details->>'item_code'));
 CREATE INDEX item_by_loc ON items ((details->>'location'));
 CREATE INDEX item_by_static ON items ((cast(details->>'is_static' as boolean)));
-  
+CREATE INDEX item_by_display ON items (lower(details->>'display'));
+CREATE INDEX item_by_display_less_explicit ON items (lower(details->>'display_less_explicit'));
+
 CREATE TABLE users (
   -- Username here is all lower case, but details has correct case version.
   username TEXT NOT NULL PRIMARY KEY,

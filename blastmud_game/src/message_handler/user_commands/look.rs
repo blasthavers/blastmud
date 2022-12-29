@@ -42,7 +42,7 @@ pub fn render_map(room: &room::Room, width: usize, height: usize) -> String {
 pub async fn describe_normal_item(ctx: &VerbContext<'_>, item: &Item) -> UResult<()> {
     ctx.trans.queue_for_session(
         ctx.session,
-        Some(&format!("{}\n{}",
+        Some(&format!("{}\n{}\n",
                       explicit_if_allowed(
                           ctx,
                           &item.display,
@@ -147,10 +147,11 @@ impl UserVerb for Verb {
     async fn handle(self: &Self, ctx: &mut VerbContext, _verb: &str, remaining: &str) -> UResult<()> {
         let player_item = get_player_item_or_fail(ctx).await?;
 
+        let rem_trim = remaining.trim().to_lowercase();
         let (heretype, herecode) = player_item.location.split_once("/").unwrap_or(("room", "repro_xv_chargen"));
-        let (itype, icode) = if remaining == "" {
-            Ok((heretype, herecode))
-        } else if let Some(dir) = Direction::parse(remaining) {
+        let (itype, icode): (String, String) = if rem_trim == "" {
+            Ok((heretype.to_owned(), herecode.to_owned()))
+        } else if let Some(dir) = Direction::parse(&rem_trim) {
             if heretype != "room" {
                 // Fix this when we have planes / boats / roomkits.
                 user_error("Navigating outside rooms not yet supported.".to_owned())
@@ -161,7 +162,7 @@ impl UserVerb for Verb {
                         Some(exit) => {
                             match room::resolve_exit(room, exit) {
                                 None => user_error("There is nothing in that direction".to_owned()),
-                                Some(room2) => Ok(("room", room2.code))
+                                Some(room2) => Ok(("room".to_owned(), room2.code.to_owned()))
                             }
                         }
                     }
@@ -169,16 +170,30 @@ impl UserVerb for Verb {
                     user_error("Can't find your current location".to_owned())
                 }
             }
+        } else if rem_trim == "me" || rem_trim == "self" {
+            Ok((player_item.item_type.clone(), player_item.item_code.clone()))
         } else {
-            user_error("Sorry, I don't understand what you want to look at.".to_owned())
+            match &ctx.trans.resolve_items_by_display_name_for_player(
+                &player_item,
+                &rem_trim,
+                true, true, false, false
+            ).await?[..] {
+                [] => user_error("Sorry, I couldn't find anything matching.".to_owned()),
+                [match_it] => Ok((match_it.item_type.clone(), match_it.item_code.clone())),
+                [item1, ..] if item1.display.to_lowercase() == rem_trim ||
+                    item1.display_less_explicit.as_ref().map(|x|x.to_lowercase()) == Some(rem_trim) =>
+                    Ok((item1.item_type.clone(), item1.item_code.clone())),
+                _ => user_error("Sorry, that name is ambiguous, please be more specific.".to_owned())
+            }
         }?;
-        let item = ctx.trans.find_item_by_type_code(itype, icode).await?
+        let item = ctx.trans.find_item_by_type_code(&itype, &icode).await?
             .ok_or_else(|| UserError("Sorry, that no longer exists".to_owned()))?;
         if itype != "room" {
             describe_normal_item(ctx, &item).await?;
         } else {
             let room =
-                room::room_map_by_code().get(icode).ok_or_else(|| UserError("Sorry, that room no longer exists".to_owned()))?;
+                room::room_map_by_code().get(icode.as_str())
+                .ok_or_else(|| UserError("Sorry, that room no longer exists".to_owned()))?;
             describe_room(ctx, &room, &list_item_contents(ctx, &item).await?).await?;
         }
         Ok(())
