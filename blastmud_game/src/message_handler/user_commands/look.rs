@@ -107,6 +107,8 @@ async fn list_item_contents<'l>(ctx: &'l VerbContext<'_>, item: &'l Item) -> URe
         match head.action_type {
             LocationActionType::Sitting => buf.push_str("sitting "),
             LocationActionType::Reclining => buf.push_str("reclining "),
+            LocationActionType::Normal | LocationActionType::Attacking(_) if is_creature =>
+                buf.push_str("standing "),
             _ => {}
         }
         buf.push_str("here");
