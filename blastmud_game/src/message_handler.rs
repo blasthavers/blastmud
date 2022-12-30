@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::DResult;
 
 mod new_session;
-mod user_commands;
+pub mod user_commands;
 
 #[derive(Clone,Debug)]
 pub struct ListenerSession {

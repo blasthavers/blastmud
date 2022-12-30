@@ -164,7 +164,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     various stages of development floating in them. It smells like bleach. \
                     Being here makes you realise you aren't exactly alive right now... you \
                     have no body. But you sense you could go <bold>up<reset> and attach \
-                    your memories to a body matching your current stats."),
+                    your memories to a body matching your current stats"),
                 description_less_explicit: None,
                 grid_coords: GridCoords { x: 1, y: 0, z: 1 },
                 exits: vec!()
@@ -192,7 +192,9 @@ pub fn room_static_items() -> Box<dyn Iterator<Item = StaticItem>> {
             item_code: r.code.to_owned(),
             item_type: "room".to_owned(),
             display: r.name.to_owned(),
-            location: format!("room/{}", r.code),
+            details: Some(r.description.to_owned()),
+            details_less_explicit: r.description_less_explicit.map(|d|d.to_owned()),
+            location: format!("zone/{}", r.zone),
             is_static: true,
             ..Item::default()
         })

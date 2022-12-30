@@ -14,6 +14,7 @@ mod av;
 mod regular_tasks;
 mod models;
 mod static_content;
+mod language;
 
 pub type DResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
 

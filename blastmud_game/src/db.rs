@@ -8,10 +8,11 @@ use uuid::Uuid;
 use tokio_postgres::NoTls;
 use crate::message_handler::ListenerSession;
 use crate::DResult;
+use crate::message_handler::user_commands::parsing::parse_offset;
 use crate::models::{session::Session, user::User, item::Item};
 use tokio_postgres::types::ToSql;
 use std::collections::BTreeSet;
-
+use std::sync::Arc;
 use serde_json::{self, Value};
 use futures::FutureExt;
 
@@ -175,6 +176,29 @@ impl DBPool {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct ItemSearchParams<'l> {
+    pub from_item: &'l Item,
+    pub query: &'l str,
+    pub include_contents: bool,
+    pub include_loc_contents: bool,
+    pub include_active_players: bool,
+    pub include_all_players: bool
+}
+
+impl ItemSearchParams<'_> {
+    pub fn base<'l>(from_item: &'l Item, query: &'l str) -> ItemSearchParams<'l> {
+        ItemSearchParams {
+            from_item, query,
+            include_contents: false,
+            include_loc_contents: false,
+            include_active_players: false,
+            include_all_players: false
+        }
+    }
+}
+
+
 impl DBTrans {
     pub async fn queue_for_session(self: &Self,
                                    session: &ListenerSession,
@@ -238,7 +262,7 @@ impl DBTrans {
         // Only copy more permanent fields, others are supposed to change over time and shouldn't
         // be reset on restart.
         for to_copy in ["display", "display_less_explicit", "details", "details_less_explicit",
-                        "total_xp", "total_stats", "total_skills"] {
+                        "total_xp", "total_stats", "total_skills", "pronouns"] {
             det_ex = format!("jsonb_set({}, '{{{}}}', ${})", det_ex, to_copy, var_id);
             params.push(obj_map.get(to_copy).unwrap_or(&Value::Null));
             var_id += 1;
@@ -314,61 +338,74 @@ impl DBTrans {
     }
 
     pub async fn find_item_by_type_code(self: &Self, item_type: &str, item_code: &str) ->
-        DResult<Option<Item>> {
+        DResult<Option<Arc<Item>>> {
         if let Some(item) = self.pg_trans()?.query_opt(
             "SELECT details FROM items WHERE \
              details->>'item_type' = $1 AND \
              details->>'item_code' = $2", &[&item_type, &item_code]).await? {
-          return Ok(serde_json::from_value(item.get("details"))?);
+          return Ok(Some(Arc::new(serde_json::from_value::<Item>(item.get("details"))?)));
         }
         Ok(None)
     }
 
-    pub async fn find_items_by_location(self: &Self, location: &str) -> DResult<Vec<Item>> {
+    pub async fn find_items_by_location(self: &Self, location: &str) -> DResult<Vec<Arc<Item>>> {
         Ok(self.pg_trans()?.query(
             "SELECT details FROM items WHERE details->>'location' = $1 \
-             LIMIT 20", &[&location]
+             ORDER BY details->>'display'
+             LIMIT 100", &[&location]
         ).await?.into_iter()
            .filter_map(|i| serde_json::from_value(i.get("details")).ok())
+           .map(Arc::new)
            .collect())
-        
     }
 
-    pub async fn resolve_items_by_display_name_for_player(
+    pub async fn resolve_items_by_display_name_for_player<'l>(
         self: &Self,
-        from_item: &Item,
-        query: &str,
-        include_contents: bool,
-        include_loc_contents: bool,
-        include_active_players: bool,
-        include_all_players: bool
-    ) -> DResult<Vec<Item>> {
+        search: &'l ItemSearchParams<'l>
+    ) -> DResult<Arc<Vec<Arc<Item>>>> {
         let mut ctes: Vec<String> = Vec::new();
         let mut include_tables: Vec<&'static str> = Vec::new();
 
-        let player_loc = &from_item.location;
-        let player_desig = format!("{}/{}", from_item.item_type,
-                                   from_item.item_code);
-        if include_contents {
-            ctes.push("contents AS (\
-                         SELECT details FROM items WHERE details->>'location' = $1
-                      )".to_owned());
+        let player_loc = &search.from_item.location;
+        let player_desig = format!("{}/{}", search.from_item.item_type,
+                                   search.from_item.item_code);
+        
+        let (offset, query) = parse_offset(search.query);
+        let mut param_no: usize = 3;
+        let query_wildcard = query.replace("\\", "\\\\")
+              .replace("_", "\\_")
+              .replace("%", "")
+            .to_lowercase() + "%";
+        let offset_sql = offset.map(|x| (if x >= 1 { x - 1 } else { x}) as i64).unwrap_or(0);
+        let mut params: Vec<&(dyn ToSql + Sync)> = vec!(
+            &query_wildcard,
+            &offset_sql);
+        
+        
+        if search.include_contents {
+            ctes.push(format!("contents AS (\
+                               SELECT details FROM items WHERE details->>'location' = ${}\
+                               )", param_no));
+            param_no += 1;
+            params.push(&player_desig);
             include_tables.push("SELECT details FROM contents");
         }
-        if include_loc_contents {
-            ctes.push("loc_contents AS (\
-                         SELECT details FROM items WHERE details->>'location' = $2
-                      )".to_owned());
+        if search.include_loc_contents {
+            ctes.push(format!("loc_contents AS (\
+                               SELECT details FROM items WHERE details->>'location' = ${}\
+                               )", param_no));
+            drop(param_no); // or increment if this is a problem.
+            params.push(&player_loc);
             include_tables.push("SELECT details FROM loc_contents");
         }
-        if include_active_players {
+        if search.include_active_players {
             ctes.push("active_players AS (\
                          SELECT details FROM items WHERE details->>'item_type' = 'player' \
                                         AND current_session IS NOT NULL \
                       )".to_owned());
             include_tables.push("SELECT details FROM active_players");
         }
-        if include_all_players {
+        if search.include_all_players {
             ctes.push("all_players AS (\
                          SELECT details FROM items WHERE details->>'item_type' = 'player'
                       )".to_owned());
@@ -377,21 +414,18 @@ impl DBTrans {
         ctes.push(format!("relevant_items AS ({})", include_tables.join(" UNION ")));
 
         let cte_str: String = ctes.join(", ");
-        
-        Ok(self.pg_trans()?.query(
+
+        Ok(Arc::new(self.pg_trans()?.query(
             &format!(
-                "WITH {} SELECT details FROM relevant_items WHERE (lower(details->>'display') LIKE $3) \
-                 OR (lower(details ->>'display_less_explicit') LIKE $3) \
+                "WITH {} SELECT details FROM relevant_items WHERE (lower(details->>'display') LIKE $1) \
+                 OR (lower(details ->>'display_less_explicit') LIKE $1) \
                  ORDER BY length(details->>'display') DESC \
-                 LIMIT 2", &cte_str),
-            &[&player_desig, &player_loc,
-              &(query.replace("\\", "\\\\")
-                .replace("_", "\\_")
-                .replace("%", "")
-                .to_lowercase() + "%")]
+                 LIMIT 2 OFFSET $2", &cte_str),
+            &params
         ).await?.into_iter()
-           .filter_map(|i| serde_json::from_value(i.get("details")).ok())
-           .collect())
+                    .filter_map(|i| serde_json::from_value(i.get("details")).ok())
+                    .map(Arc::new)
+                    .collect()))
     }
     
     pub async fn commit(mut self: Self) -> DResult<()> {

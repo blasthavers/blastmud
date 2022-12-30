@@ -8,6 +8,16 @@ pub struct Session {
     //           be an Option, or things will crash out for existing sessions.
 }
 
+impl Session {
+    pub fn explicit_if_allowed<'l>(self: &Self, explicit: &'l str, non_explicit: Option<&'l str>) -> &'l str {
+        if self.less_explicit_mode {
+            non_explicit.unwrap_or(explicit)
+        } else {
+            explicit
+        }
+    }
+}
+
 impl Default for Session {
     fn default() -> Self {
         Session { source: "unknown".to_owned(), less_explicit_mode: false }

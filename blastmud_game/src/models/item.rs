@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 use std::collections::BTreeMap;
-use super::user::{SkillType, StatType};
+use super::{user::{SkillType, StatType}, session::Session};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum BuffCause {
@@ -19,6 +19,66 @@ pub struct Buff {
     description: String,
     cause: BuffCause,
     impacts: Vec<BuffImpact>
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+pub struct Pronouns {
+    pub subject: String,
+    pub object: String,
+    pub intensive: String,
+    pub possessive: String,
+    // And some miscellaneous details to determine context
+    pub is_plural: bool, // ... are instead of ... is
+    pub is_proper: bool, // When naming, just ... instead of The ...
+}
+
+impl Pronouns {
+    pub fn default_inanimate() -> Pronouns {
+        Pronouns {
+            subject: "it".to_owned(),
+            object: "it".to_owned(),
+            intensive: "itself".to_owned(),
+            possessive: "its".to_owned(),
+            is_plural: false,
+            is_proper: true,
+        }
+    }
+
+    pub fn default_animate() -> Pronouns {
+        Pronouns {
+            subject: "they".to_owned(),
+            object: "them".to_owned(),
+            intensive: "themselves".to_owned(),
+            possessive: "their".to_owned(),
+            is_plural: true,
+            is_proper: true,
+        }
+    }
+    
+    #[allow(dead_code)]
+    pub fn default_male() -> Pronouns {
+        Pronouns {
+            subject: "he".to_owned(),
+            object: "him".to_owned(),
+            intensive: "himself".to_owned(),
+            possessive: "his".to_owned(),
+            is_plural: false,
+            is_proper: true,
+        }
+    }
+
+
+    #[allow(dead_code)]
+    pub fn default_female() -> Pronouns {
+        Pronouns {
+            subject: "she".to_owned(),
+            object: "her".to_owned(),
+            intensive: "herself".to_owned(),
+            possessive: "her".to_owned(),
+            is_plural: false,
+            is_proper: true,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
@@ -57,6 +117,24 @@ pub struct Item {
     pub total_stats: BTreeMap<StatType, u64>,
     pub total_skills: BTreeMap<SkillType, u64>,
     pub temporary_buffs: Vec<Buff>,
+    pub pronouns: Pronouns,
+}
+
+impl Item {
+    pub fn display_for_session<'l>(self: &'l Self, session: &Session) -> &'l str {
+        session.explicit_if_allowed(&self.display,
+                                    self.display_less_explicit.as_ref().map(String::as_str))
+    }
+
+    pub fn details_for_session<'l>(self: &'l Self, session: &Session) -> Option<&'l str>{
+        self.details.as_ref()
+            .map(|dets|
+                 session.explicit_if_allowed(
+                     dets.as_str(),
+                     self.details_less_explicit.as_ref().map(String::as_str)
+                 )
+            )
+    }
 }
 
 impl Default for Item {
@@ -75,7 +153,8 @@ impl Default for Item {
             total_xp: 0,
             total_stats: BTreeMap::new(),
             total_skills: BTreeMap::new(),
-            temporary_buffs: Vec::new()
+            temporary_buffs: Vec::new(),
+            pronouns: Pronouns::default_inanimate()
         }
     }
 }

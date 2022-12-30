@@ -1,11 +1,13 @@
 use super::ListenerSession;
 use crate::DResult;
-use crate::db::{DBTrans, DBPool};
+use crate::db::{DBTrans, DBPool, ItemSearchParams};
 use ansi::ansi;
 use phf::phf_map;
 use async_trait::async_trait;
-use crate::models::{session::Session, user::User};
+use crate::models::{session::Session, user::User, item::Item};
 use log::warn;
+use once_cell::sync::OnceCell;
+use std::sync::Arc;
 
 mod agree;
 mod help;
@@ -13,15 +15,16 @@ mod ignore;
 mod less_explicit_mode;
 mod login;
 mod look;
-mod parsing;
+pub mod parsing;
 mod quit;
 mod register;
+mod whisper;
 
 pub struct VerbContext<'l> {
-    session: &'l ListenerSession,
-    session_dat: &'l mut Session,
-    user_dat: &'l mut Option<User>,
-    trans: &'l DBTrans
+    pub session: &'l ListenerSession,
+    pub session_dat: &'l mut Session,
+    pub user_dat: &'l mut Option<User>,
+    pub trans: &'l DBTrans
 }
 
 pub enum CommandHandlingError {
@@ -70,15 +73,9 @@ static UNREGISTERED_COMMANDS: UserVerbRegistry = phf_map! {
 static REGISTERED_COMMANDS: UserVerbRegistry = phf_map! {
     "l" => look::VERB,
     "look" => look::VERB,
+    "-" => whisper::VERB,
+    "whisper" => whisper::VERB,
 };
-
-pub fn explicit_if_allowed<'l>(ctx: &VerbContext, explicit: &'l str, non_explicit: Option<&'l str>) -> &'l str {
-    if ctx.session_dat.less_explicit_mode {
-        non_explicit.unwrap_or(explicit)
-    } else {
-        explicit
-    }
-}
 
 fn resolve_handler(ctx: &VerbContext, cmd: &str) -> Option<&'static UserVerbRef> {
     let mut result = ALWAYS_AVAILABLE_COMMANDS.get(cmd);
@@ -138,4 +135,39 @@ pub async fn handle(session: &ListenerSession, msg: &str, pool: &DBPool) -> DRes
         }
     }
     Ok(())
+}
+
+pub fn is_likely_explicit(msg: &str) -> bool {
+    static EXPLICIT_MARKER_WORDS: OnceCell<Vec<&'static str>> =
+        OnceCell::new();
+    let markers = EXPLICIT_MARKER_WORDS.get_or_init(||
+        vec!("fuck", "sex", "cock", "cunt", "dick", "pussy", "whore",
+             "orgasm", "erection", "nipple", "boob", "tit"));
+    for word in markers {
+        if msg.contains(word) {
+            return true
+        }
+    }
+    false
+}
+
+pub fn get_user_or_fail<'l>(ctx: &'l VerbContext) -> UResult<&'l User> { 
+    ctx.user_dat.as_ref()
+        .ok_or_else(|| UserError("Not logged in".to_owned()))
+}
+
+pub async fn get_player_item_or_fail(ctx: &VerbContext<'_>) -> UResult<Arc<Item>> {
+    Ok(ctx.trans.find_item_by_type_code(
+        "player", &get_user_or_fail(ctx)?.username.to_lowercase()).await?
+       .ok_or_else(|| UserError("Your player is gone, you'll need to re-register or ask an admin".to_owned()))?)
+}
+
+pub async fn search_item_for_user<'l>(ctx: &'l VerbContext<'l>, search: &'l ItemSearchParams<'l>) ->
+    UResult<Arc<Item>> {
+        Ok(match &ctx.trans.resolve_items_by_display_name_for_player(search).await?[..] {
+            [] => user_error("Sorry, I couldn't find anything matching.".to_owned())?,
+            [match_it] => match_it.clone(),
+            [item1, ..] =>
+                item1.clone(),
+        })
 }

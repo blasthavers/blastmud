@@ -1,6 +1,6 @@
 use nom::{
-    bytes::complete::{take_till1, take_while},
-    character::{complete::{space0, space1, alpha1, one_of}},
+    bytes::complete::{take_till, take_till1, take_while},
+    character::{complete::{space0, space1, alpha1, one_of, char, u8}},
     combinator::{recognize, fail, eof},
     sequence::terminated,
     branch::alt,
@@ -22,6 +22,26 @@ pub fn parse_command_name(input: &str) -> (&str, &str) {
         /* This parser only fails on empty  / whitespace only strings. */
         Err(_) => ("", ""),
         Ok((rest, command)) => (command, rest)
+    }
+}
+
+pub fn parse_to_space(input: &str) -> (&str, &str) {
+    fn parser(input: &str) -> IResult<&str, &str> {
+        terminated(take_till(|c| c == ' ' || c == '\t'), alt((space1, eof)))(input)
+    }
+    match parser(input) {
+        Err(_) => ("", ""), /* Impossible? */
+        Ok((rest, token)) => (token, rest)
+    }
+}
+
+pub fn parse_offset(input: &str) -> (Option<u8>, &str) {
+    fn parser(input: &str) -> IResult<&str, u8> {
+        terminated(u8, char('.'))(input)
+    }
+    match parser(input) {
+        Err(_) => (None, input),
+        Ok((rest, result)) => (Some(result), rest)
     }
 }
 
@@ -120,5 +140,28 @@ mod tests {
     #[test]
     fn it_fails_on_long_usernames() {
         assert_eq!(parse_username("A23456789012345678901"), Err("Limit of 20 characters"));
+    }
+
+    #[test]
+    fn parse_to_space_splits_on_whitespace() {
+        assert_eq!(parse_to_space("hello world"), ("hello", "world"));
+        assert_eq!(parse_to_space("hello\tworld"), ("hello", "world"));
+        assert_eq!(parse_to_space("hello   world"), ("hello", "world"));
+    }
+
+    #[test]
+    fn parse_to_space_supports_missing_rest() {
+        assert_eq!(parse_to_space("hello"), ("hello", ""));
+        assert_eq!(parse_to_space(""), ("", ""));
+    }
+
+    #[test]
+    fn parse_offset_supports_no_offset() {
+        assert_eq!(parse_offset("hello world"), (None, "hello world"))
+    }
+
+    #[test]
+    fn parse_offset_supports_offset() {
+        assert_eq!(parse_offset("2.hello world"), (Some(2), "hello world"))
     }
 }

@@ -1,7 +1,7 @@
 use super::{VerbContext, UserVerb, UserVerbRef, UResult};
 use async_trait::async_trait;
 use super::{user_error, parsing::parse_username};
-use crate::models::{user::User, item::Item};
+use crate::models::{user::User, item::{Item, Pronouns}};
 use chrono::Utc;
 use ansi::ansi;
 use tokio::time;
@@ -36,6 +36,7 @@ impl UserVerb for Verb {
             display: username.to_owned(),
             details: Some("A non-descript individual".to_owned()),
             location: "room/repro_xv_chargen".to_owned(),
+            pronouns: Pronouns::default_animate(),
             ..Item::default()
         }).await?;
 
