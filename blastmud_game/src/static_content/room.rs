@@ -311,7 +311,13 @@ pub fn room_list() -> &'static Vec<Room> {
             },
             Room {
                 zone: "melbs",
-                secondary_zones: vec!(),
+                secondary_zones: vec!(
+                    SecondaryZoneRecord {
+                        zone: "repro_xv",
+                        short: ansi!("<bggreen><white>EX<reset>"),
+                        grid_coords: GridCoords { x: 1, y: 0, z: 0 }
+                    }
+                ),
                 code: "melbs_kingst_500",
                 name: ansi!("King Street - 500 block"),
                 short: ansi!("<yellow>||<reset>"),
