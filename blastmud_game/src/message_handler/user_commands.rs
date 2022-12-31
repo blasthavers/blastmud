@@ -156,6 +156,11 @@ pub fn get_user_or_fail<'l>(ctx: &'l VerbContext) -> UResult<&'l User> {
         .ok_or_else(|| UserError("Not logged in".to_owned()))
 }
 
+pub fn get_user_or_fail_mut<'l>(ctx: &'l mut VerbContext) -> UResult<&'l mut User> { 
+    ctx.user_dat.as_mut()
+        .ok_or_else(|| UserError("Not logged in".to_owned()))
+}
+
 pub async fn get_player_item_or_fail(ctx: &VerbContext<'_>) -> UResult<Arc<Item>> {
     Ok(ctx.trans.find_item_by_type_code(
         "player", &get_user_or_fail(ctx)?.username.to_lowercase()).await?

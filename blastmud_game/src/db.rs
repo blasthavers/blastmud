@@ -359,6 +359,17 @@ impl DBTrans {
            .collect())
     }
 
+    pub async fn save_item_model(self: &Self, details: &Item)
+                                 -> DResult<()> {
+        self.pg_trans()?
+            .execute("UPDATE items SET details = $1 WHERE \
+                      details->>'item_type' = $2 AND \
+                      details->>'item_code' = $3",
+                     &[&serde_json::to_value(details)?,
+                       &details.item_type, &details.item_code]).await?;
+        Ok(())
+    }
+
     pub async fn resolve_items_by_display_name_for_player<'l>(
         self: &Self,
         search: &'l ItemSearchParams<'l>

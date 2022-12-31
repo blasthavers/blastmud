@@ -101,6 +101,12 @@ pub enum LocationActionType {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum Sex {
+    Male,
+    Female,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Item {
     pub item_code: String,
     pub item_type: String,
@@ -114,10 +120,11 @@ pub struct Item {
     pub is_static: bool,
 
     pub total_xp: u64,
-    pub total_stats: BTreeMap<StatType, u64>,
-    pub total_skills: BTreeMap<SkillType, u64>,
+    pub total_stats: BTreeMap<StatType, u16>,
+    pub total_skills: BTreeMap<SkillType, u16>,
     pub temporary_buffs: Vec<Buff>,
     pub pronouns: Pronouns,
+    pub sex: Option<Sex>,
 }
 
 impl Item {
@@ -154,7 +161,8 @@ impl Default for Item {
             total_stats: BTreeMap::new(),
             total_skills: BTreeMap::new(),
             temporary_buffs: Vec::new(),
-            pronouns: Pronouns::default_inanimate()
+            pronouns: Pronouns::default_inanimate(),
+            sex: None
         }
     }
 }
