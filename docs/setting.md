@@ -1,6 +1,6 @@
 # Blastmud setting guidelines for developers
-## The Empire (500-200 years ago)
-About 500 years ago, a group of powerful tech corporation CEOs from around the world grew dissatisfied with the state of the
+## The Empire (300-50 years ago)
+About 300 years ago, a group of powerful tech corporation CEOs from around the world grew dissatisfied with the state of the
 world. Nations were always fighting, wasting resources and creating an unstable business environment. Some countries decided
 to nationalise assets, and others imposed heavy taxes to help the poor (which was a bad thing from the perspective of the
 wealthy CEOs).
@@ -43,8 +43,8 @@ there were not separate races any more. With no national boundaries or nationali
 The Empire mostly allowed people to do their own thing, subject to the rules enforced by the wrist-pad and by a network
 of automated defence systems that make AI-driven judgements and dispensed lethal justice.
 
-## The Smiting Shadows (220-195 years ago)
-About 220 years ago, a group of hackers discovered an archive of radical right-wing videos from before the Empire years,
+## The Smiting Shadows (50-70 years ago)
+About 70 years ago, a group of hackers discovered an archive of radical right-wing videos from before the Empire years,
 and circulated them (which was not initially against the rules). They became radicalised by the videos, but were
 frustrated by their inability to act to violently take down the Empire due to their wristbands. After years of
 trying, they found a way to modify the wristpads to make them think everyone had consented to fight with them,
@@ -53,7 +53,7 @@ and hence allow violence against anyone.
 They immediately started building an underground city, and building and stockpiling conventional and nuclear
 weapons, ready to take down the Empire.
 
-About 201 years ago, the Emperor learned of the plans, and ordered that all wristpads be updated to block
+About 51 years ago, the Emperor learned of the plans, and ordered that all wristpads be updated to block
 the exploit, and also that those with already exploited wristpads be killed. The Smiting Shadows, now exposed,
 went full on aggressive, but was losing the battle. Finally, backed into a corner, the Grand Umbra of the
 Smiting Shadows (i.e. the leader) ordered that a barrage of nuclear warheads be launched to their targets all
@@ -71,7 +71,7 @@ PCs). The ability to create new hacked wristpads for someone who doesn't already
 to the patches released by the Empire in its last days (i.e. no player can have it), but many hostile
 NPCs derive from these scattered Smiting Shadow members.
 
-## The post-apocalyptic period (200 years ago - present)
+## The post-apocalyptic period (50 years ago - present)
 The Empire was smashed, and some smaller relatively disorganised governments rule local regions.
 Much of the world is radioactive.
 

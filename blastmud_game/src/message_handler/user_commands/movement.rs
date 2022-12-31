@@ -1,0 +1,48 @@
+use super::{
+    VerbContext, UserVerb, UserVerbRef, UResult, UserError, user_error,
+    get_player_item_or_fail,
+    look
+};
+use async_trait::async_trait;
+use crate::static_content::room::{self, Direction, ExitType};
+
+pub struct Verb;
+#[async_trait]
+impl UserVerb for Verb {
+    async fn handle(self: &Self, ctx: &mut VerbContext, verb: &str, remaining: &str) -> UResult<()> {
+        let dir = Direction::parse(verb).ok_or_else(|| UserError("Unknown direction".to_owned()))?;
+        if remaining.trim() != "" {
+            user_error("Movement commands don't take extra data at the end.".to_owned())?;
+        }
+        let player_item = get_player_item_or_fail(ctx).await?;
+        let (heretype, herecode) = player_item.location.split_once("/").unwrap_or(("room", "repro_xv_chargen"));
+        if heretype != "room" {
+            // Fix this when we have planes / boats / roomkits.
+            user_error("Navigating outside rooms not yet supported.".to_owned())?
+        }
+        let room = room::room_map_by_code().get(herecode)
+            .ok_or_else(|| UserError("Can't find your current location".to_owned()))?;
+        let exit = room.exits.iter().find(|ex| ex.direction == *dir)
+            .ok_or_else(|| UserError("There is nothing in that direction".to_owned()))?;
+
+        // Ideally we would queue if we were already moving rather than insta-move.
+        match exit.exit_type {
+            ExitType::Free => {}
+            ExitType::Blocked(blocker) => {
+                if !blocker.attempt_exit(ctx, &player_item, exit).await? {
+                    return Ok(());
+                }
+            }
+        }
+
+        let new_room =
+            room::resolve_exit(room, exit).ok_or_else(|| UserError("Can't find that room".to_owned()))?;
+        let mut new_player_item = (*player_item).clone();
+        new_player_item.location = format!("{}/{}", "room", new_room.code);
+        ctx.trans.save_item_model(&new_player_item).await?;
+        look::VERB.handle(ctx, verb, remaining).await?;
+        Ok(())
+    }
+}
+static VERB_INT: Verb = Verb;
+pub static VERB: UserVerbRef = &VERB_INT as UserVerbRef;

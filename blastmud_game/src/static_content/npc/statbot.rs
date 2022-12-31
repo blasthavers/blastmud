@@ -1,4 +1,5 @@
 use super::NPCMessageHandler;
+use super::super::room::{ExitBlocker, Exit};
 use crate::message_handler::user_commands::{
     VerbContext, UResult,
     get_user_or_fail,
@@ -12,12 +13,11 @@ use crate::models::{
     session::Session
 };
 use ansi::ansi;
-use serde::{Serialize, Deserialize};
 use nom::character::complete::u8;
 
 pub struct StatbotMessageHandler;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Eq, PartialEq, Clone, Debug)]
 pub enum StatbotState {
     Brains,
     Senses,
@@ -35,6 +35,15 @@ async fn reply(ctx: &VerbContext<'_>, msg: &str) -> UResult<()> {
     ctx.trans.queue_for_session(
         ctx.session,
         Some(&format!(ansi!("Statbot replies in a mechanical voice: <blue>\"{}\"<reset>\n"),
+                     msg))
+    ).await?;
+    Ok(())
+}
+
+async fn shout(ctx: &VerbContext<'_>, msg: &str) -> UResult<()> {
+    ctx.trans.queue_for_session(
+        ctx.session,
+        Some(&format!(ansi!("Statbot shouts in a stern mechanical voice: <red>\"{}\"<reset>\n"),
                      msg))
     ).await?;
     Ok(())
@@ -81,7 +90,7 @@ fn points_left(user: &User) -> u16 {
     (62 - (brn + sen + brw + refl + end + col) as i16).max(0) as u16
 }
 
-fn next_action_text(session: &Session, user: &User) -> String {
+fn next_action_text(session: &Session, user: &User, item: &Item) -> String {
     let brn = user.raw_stats.get(&StatType::Brains).cloned().unwrap_or(8);
     let sen = user.raw_stats.get(&StatType::Senses).cloned().unwrap_or(8);
     let brw = user.raw_stats.get(&StatType::Brawn).cloned().unwrap_or(8);
@@ -90,12 +99,11 @@ fn next_action_text(session: &Session, user: &User) -> String {
     let col = user.raw_stats.get(&StatType::Cool).cloned().unwrap_or(8);
     let summary = format!("Brains: {}, Senses: {}, Brawn: {}, Reflexes: {}, Endurance: {}, Cool: {}. To spend: {}", brn, sen, brw, refl, end, col, points_left(user));
 
-    let st = user.statbot.as_ref().unwrap_or(&StatbotState::Brains);
+    let st = work_out_state(user, item);
     
     match st {
         StatbotState::Brains => ansi!(
-            "I am Statbot, a robot servant of the empire, put here to help you choose \
-             how your body will function. The base body has 8 each of brains, senses, \
+            "The base body has 8 each of brains, senses, \
              brawn, reflexes, endurance and cool - but you get 14 points of improvement. \
              Each point spent lifts that stat by one. Your first job is to choose how much \
              brainpower you will have. If you choose 8, you don't spend any points. There \
@@ -202,14 +210,13 @@ async fn stat_command(ctx: &mut VerbContext<'_>, item: &Item,
             {
                 let user_mut = get_user_or_fail_mut(ctx)?;
                 user_mut.raw_stats.insert(stat.clone(), statno as u16);
-                user_mut.statbot = Some(work_out_state(user_mut, item));
             }
             let user: &User = get_user_or_fail(ctx)?;
             ctx.trans.save_user_model(user).await?;
             let mut item_updated = item.clone();
             item_updated.total_stats = user.raw_stats.clone();
             ctx.trans.save_item_model(&item_updated).await?;
-            reply(ctx, &next_action_text(&ctx.session_dat, user)).await?;
+            reply(ctx, &next_action_text(&ctx.session_dat, user, &item_updated)).await?;
         }
     }
 
@@ -234,14 +241,9 @@ async fn sex_command(ctx: &mut VerbContext<'_>, item: &Item,
         Sex::Female => Pronouns::default_female()
     };
     item_updated.sex = Some(choice);
-    {
-        let user_mut = get_user_or_fail_mut(ctx)?;
-        user_mut.statbot = Some(work_out_state(user_mut, &item_updated));
-    }
     let user: &User = get_user_or_fail(ctx)?;
-    ctx.trans.save_user_model(user).await?;
     ctx.trans.save_item_model(&item_updated).await?;
-    reply(ctx, &next_action_text(&ctx.session_dat, user)).await?;
+    reply(ctx, &next_action_text(&ctx.session_dat, user, &item_updated)).await?;
     Ok(())
 }
 
@@ -264,9 +266,30 @@ impl NPCMessageHandler for StatbotMessageHandler {
             "cool" | "col" => stat_command(ctx, source, &StatType::Cool, &arg).await?,
             "sex" => sex_command(ctx, source, &arg).await?,
             _ => {
-                reply(ctx, &next_action_text(&ctx.session_dat, get_user_or_fail(ctx)?)).await?;
+                reply(ctx, &next_action_text(&ctx.session_dat, get_user_or_fail(ctx)?, source)).await?;
             }
         }
         Ok(())
+    }
+}
+
+pub struct ChoiceRoomBlocker;
+#[async_trait]
+impl ExitBlocker for ChoiceRoomBlocker {
+    // True if they will be allowed to pass the exit, false otherwise.
+    async fn attempt_exit(
+        self: &Self,
+        ctx: &mut VerbContext,
+        player: &Item,
+        _exit: &Exit
+    ) -> UResult<bool> {
+        let user = get_user_or_fail(ctx)?;
+        if work_out_state(user, player) == StatbotState::Done {
+            Ok(true)
+        } else {
+            shout(ctx, &format!(ansi!("YOU SHALL NOT PASS UNTIL YOU DO AS I SAY! <blue>{}"),
+                                &next_action_text(&ctx.session_dat, user, player))).await?;
+            Ok(false)
+        }
     }
 }

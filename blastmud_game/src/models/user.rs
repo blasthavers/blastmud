@@ -1,7 +1,6 @@
 use serde::{Serialize, Deserialize};
 use chrono::{DateTime, Utc};
 use std::collections::BTreeMap;
-use crate::static_content::npc::statbot::StatbotState;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct UserTermData {
@@ -76,7 +75,6 @@ pub struct User {
     
     pub terms: UserTermData,
     pub experience: UserExperienceData,
-    pub statbot: Option<StatbotState>,
     pub raw_skills: BTreeMap<SkillType, u16>,
     pub raw_stats: BTreeMap<StatType, u16>,
     // Reminder: Consider backwards compatibility when updating this. New fields should generally
@@ -115,7 +113,6 @@ impl Default for User {
             banned_until: None,
             abandoned_at: None,
             chargen_last_completed_at: None,
-            statbot: None,
             
             terms: UserTermData::default(),
             experience: UserExperienceData::default(),

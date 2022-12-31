@@ -6,6 +6,7 @@ use log::info;
 
 pub mod room;
 pub mod npc;
+mod fixed_item;
 
 pub struct StaticItem {
     pub item_code: &'static str,
@@ -27,6 +28,10 @@ fn static_item_registry() -> Vec<StaticItemTypeGroup> {
         StaticItemTypeGroup {
             item_type: "room",
             items: || room::room_static_items()
+        },
+        StaticItemTypeGroup {
+            item_type: "fixed_item",
+            items: || fixed_item::static_items()
         },
     )
 }

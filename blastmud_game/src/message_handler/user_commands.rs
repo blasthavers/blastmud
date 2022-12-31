@@ -10,11 +10,13 @@ use once_cell::sync::OnceCell;
 use std::sync::Arc;
 
 mod agree;
+mod describe;
 mod help;
 mod ignore;
 mod less_explicit_mode;
 mod login;
 mod look;
+mod movement;
 pub mod parsing;
 mod quit;
 mod register;
@@ -71,8 +73,31 @@ static UNREGISTERED_COMMANDS: UserVerbRegistry = phf_map! {
 };
 
 static REGISTERED_COMMANDS: UserVerbRegistry = phf_map! {
+    // Movement comments first:
+    "north" => movement::VERB,
+    "n" => movement::VERB,
+    "northeast" => movement::VERB,
+    "ne" => movement::VERB,
+    "east" => movement::VERB,
+    "e" => movement::VERB,
+    "southeast" => movement::VERB,
+    "se" => movement::VERB,
+    "south" => movement::VERB,
+    "s" => movement::VERB,
+    "southwest" => movement::VERB,
+    "sw" => movement::VERB,
+    "west" => movement::VERB,
+    "w" => movement::VERB,
+    "northwest" => movement::VERB,
+    "nw" => movement::VERB,
+    "up" => movement::VERB,
+    "down" => movement::VERB,
+    
+    // Other commands (alphabetical except aliases grouped):
+    "describe" => describe::VERB,
     "l" => look::VERB,
     "look" => look::VERB,
+    "read" => look::VERB,
     "-" => whisper::VERB,
     "whisper" => whisper::VERB,
 };
@@ -164,7 +189,7 @@ pub fn get_user_or_fail_mut<'l>(ctx: &'l mut VerbContext) -> UResult<&'l mut Use
 pub async fn get_player_item_or_fail(ctx: &VerbContext<'_>) -> UResult<Arc<Item>> {
     Ok(ctx.trans.find_item_by_type_code(
         "player", &get_user_or_fail(ctx)?.username.to_lowercase()).await?
-       .ok_or_else(|| UserError("Your player is gone, you'll need to re-register or ask an admin".to_owned()))?)
+       .ok_or_else(|| UserError("Your character is gone, you'll need to re-register or ask an admin".to_owned()))?)
 }
 
 pub async fn search_item_for_user<'l>(ctx: &'l VerbContext<'l>, search: &'l ItemSearchParams<'l>) ->

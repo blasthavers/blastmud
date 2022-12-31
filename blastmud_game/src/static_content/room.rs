@@ -2,6 +2,10 @@ use super::StaticItem;
 use once_cell::sync::OnceCell;
 use std::collections::BTreeMap;
 use ansi::ansi;
+use async_trait::async_trait;
+use crate::message_handler::user_commands::{
+    UResult, VerbContext
+};
 use crate::models::item::Item;
 
 pub struct Zone {
@@ -48,8 +52,20 @@ impl GridCoords {
     }
 }
 
+#[async_trait]
+pub trait ExitBlocker {
+    // True if they will be allowed to pass the exit, false otherwise.
+    async fn attempt_exit(
+        self: &Self,
+        ctx: &mut VerbContext,
+        player: &Item,
+        exit: &Exit
+    ) -> UResult<bool>;
+}
+
 pub enum ExitType {
     Free, // Anyone can just walk it.
+    Blocked(&'static (dyn ExitBlocker + Sync + Send)), // Custom code about who can pass.
     // Future ideas: Doors with locks, etc...
 }
 
@@ -96,6 +112,8 @@ impl Direction {
             "southeast" | "se" => Some(&Direction::SOUTHEAST),
             "northwest" | "nw" => Some(&Direction::NORTHEAST),
             "southwest" | "sw" => Some(&Direction::SOUTHWEST),
+            "up" => Some(&Direction::UP),
+            "down" => Some(&Direction::DOWN),
             _ => None
         }
     }
@@ -103,18 +121,25 @@ impl Direction {
 
 pub enum ExitTarget {
     UseGPS,
-    #[allow(dead_code)]
     Custom(&'static str)
 }
 
 pub struct Exit {
     pub direction: Direction,
     pub target: ExitTarget,
-    pub exit_type: ExitType
+    pub exit_type: ExitType,
+}
+
+pub struct SecondaryZoneRecord {
+    pub zone: &'static str,
+    pub short: &'static str,
+    pub grid_coords: GridCoords
 }
 
 pub struct Room {
     pub zone: &'static str,
+    // Other zones where it can be seen on the map and accessed.
+    pub secondary_zones: Vec<SecondaryZoneRecord>,
     pub code: &'static str,
     pub name: &'static str,
     pub short: &'static str,
@@ -130,8 +155,9 @@ pub fn room_list() -> &'static Vec<Room> {
         || vec!(
             Room {
                 zone: "repro_xv",
+                secondary_zones: vec!(),
                 code: "repro_xv_chargen",
-                name: ansi!("<yellow>Choice Room<reset>"),
+                name: ansi!("Choice Room"),
                 short: ansi!("<bgwhite><green>CR<reset>"),
                 description: ansi!(
                     "A room brightly lit in unnaturally white light, covered in sparkling \
@@ -147,7 +173,26 @@ pub fn room_list() -> &'static Vec<Room> {
                     [Try <bold>-statbot hi<reset>, to send hi to statbot - the - means \
                     to whisper to a particular person in the room]"),
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 0, y: 0, z: 1 },
+                grid_coords: GridCoords { x: 0, y: 0, z: -1 },
+                exits: vec!(Exit {
+                    direction: Direction::EAST,
+                    target: ExitTarget::UseGPS,
+                    exit_type: ExitType::Blocked(&super::npc::statbot::ChoiceRoomBlocker),
+                })
+            },
+            Room {
+                zone: "repro_xv",
+                secondary_zones: vec!(),
+                code: "repro_xv_updates",
+                name: ansi!("Update Centre"),
+                short: ansi!("<bgwhite><green>UC<reset>"),
+                description: ansi!(
+                    "A room covered in posters, evidently meant to help newly wiped individuals \
+                    get up to speed on what has happened in the world since their memory implant was \
+                    created. A one-way opens to the east - you have a feeling that once you go through, \
+                    there will be no coming back in here. <bold>[Hint: Try reading the posters here.]<reset>"),
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: 0, z: -1 },
                 exits: vec!(Exit {
                     direction: Direction::EAST,
                     target: ExitTarget::UseGPS,
@@ -156,8 +201,9 @@ pub fn room_list() -> &'static Vec<Room> {
             },
             Room {
                 zone: "repro_xv",
+                secondary_zones: vec!(),
                 code: "repro_xv_respawn",
-                name: ansi!("<yellow>Body Factory<reset>"),
+                name: ansi!("Body Factory"),
                 short: ansi!("<bgmagenta><white>BF<reset>"),
                 description: ansi!(
                     "A room filled with glass vats full of clear fluids, with bodies of \
@@ -166,8 +212,169 @@ pub fn room_list() -> &'static Vec<Room> {
                     have no body. But you sense you could go <bold>up<reset> and attach \
                     your memories to a body matching your current stats"),
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 1, y: 0, z: 1 },
-                exits: vec!()
+                grid_coords: GridCoords { x: 2, y: 0, z: -1 },
+                exits: vec!(Exit {
+                    direction: Direction::UP,
+                    target: ExitTarget::UseGPS,
+                    exit_type: ExitType::Free
+                })
+            },
+            Room {
+                zone: "repro_xv",
+                secondary_zones: vec!(SecondaryZoneRecord {
+                    zone: "melbs",
+                    short: ansi!("<bgmagenta><white>RL<reset>"),
+                    grid_coords: GridCoords { x: 2, y: 0, z: 0 },
+                }),
+                code: "repro_xv_lobby",
+                name: "Lobby",
+                short: "<=",
+                description: ansi!(
+                    "An entrance for an establishment called ReproLabs XV. \
+                    It looks like they make bodies and attach peoples memories to \
+                    them, and allow people to reclone when they die. It has an \
+                    unattended reception desk, with chrome-plated letters reading \
+                    ReproLabs XV stuck to the wall behind it. A pipe down to into the ground \
+                    opens up here, but the airflow is so strong, it looks like it is out \
+                    only - it seems to be how newly re-cloned bodies get back into the world"),
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 2, y: 0, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::Custom("room/melbs_kingst_500"),
+                        exit_type: ExitType::Free
+                    })
+            },
+
+
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_200",
+                name: "King Street - 200 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: -3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_300",
+                name: "King Street - 300 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: -2, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_400",
+                name: "King Street - 400 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_500",
+                name: ansi!("King Street - 500 block"),
+                short: ansi!("<yellow>||<reset>"),
+                description: ansi!(
+                    "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side"),
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: 0, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::Custom("room/repro_xv_lobby"),
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            }, 
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_600",
+                name: "King Street - 600 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: 1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_700",
+                name: "King Street - 700 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: 2, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
             },
         ).into_iter().collect())
 }
@@ -182,7 +389,13 @@ static STATIC_ROOM_MAP_BY_ZLOC: OnceCell<BTreeMap<(&'static str, &'static GridCo
                                                   &'static Room>> = OnceCell::new();
 pub fn room_map_by_zloc() -> &'static BTreeMap<(&'static str, &'static GridCoords), &'static Room> {
     STATIC_ROOM_MAP_BY_ZLOC.get_or_init(
-        || room_list().iter().map(|r| ((r.zone, &r.grid_coords), r)).collect())
+        || room_list().iter()
+            .map(|r| ((r.zone, &r.grid_coords), r))
+            .chain(room_list().iter()
+                   .flat_map(|r| r.secondary_zones.iter()
+                                  .map(|sz| ((sz.zone, &sz.grid_coords), r))
+                                  .collect::<Vec<((&'static str, &'static GridCoords), &'static Room)>>()))
+            .collect())
 }
 
 pub fn room_static_items() -> Box<dyn Iterator<Item = StaticItem>> {

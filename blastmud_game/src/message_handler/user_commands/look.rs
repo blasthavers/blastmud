@@ -23,7 +23,14 @@ pub fn render_map(room: &room::Room, width: usize, height: usize) -> String {
             } else {
                 buf.push_str(room::room_map_by_zloc()
                              .get(&(&room.zone, &room::GridCoords { x, y, z: my_loc.z }))
-                             .map(|r| r.short)
+                             .map(|r| if room.zone == r.zone {
+                                 r.short
+                             } else {
+                                 r.secondary_zones.iter()
+                                  .find(|sz| sz.zone == room.zone)
+                                  .map(|sz| sz.short)
+                                  .expect("Secondary zone missing")
+                             })
                              .unwrap_or("  "));
             }
         }
@@ -55,8 +62,8 @@ pub async fn describe_room(ctx: &VerbContext<'_>, item: &Item,
     let zone = room::zone_details().get(room.zone).map(|z|z.display).unwrap_or("Outside of time");
     ctx.trans.queue_for_session(
         ctx.session,
-        Some(&flow_around(&render_map(room, 5, 5), 10, "  ",
-                          &word_wrap(&format!("{} ({})\n{}.{}\n{}\n",
+        Some(&flow_around(&render_map(room, 5, 5), 10, ansi!("<reset>  "),
+                          &word_wrap(&format!(ansi!("<yellow>{}<reset> (<blue>{}<reset>)\n{}.{}\n{}\n"),
                                               item.display_for_session(&ctx.session_dat),
                                               zone,
                                               item.details_for_session(
