@@ -35,6 +35,10 @@ impl UserVerb for Verb {
             say_what
         ))).await?;
 
+        if player_item == to_whom {
+            return Ok(());
+        }
+
         match to_whom.item_type.as_str() {
             "npc" => {
                 let npc = npc_by_code().get(to_whom.item_code.as_str())
@@ -45,6 +49,23 @@ impl UserVerb for Verb {
                 }
             }
             "player" => {
+                match ctx.trans.find_session_for_player(&to_whom.item_code).await? {
+                    None => user_error("That character is asleep.".to_string())?,
+                    Some((other_session, other_session_dets)) => {
+                        if other_session_dets.less_explicit_mode && is_likely_explicit(&say_what) {
+                            user_error("That player is on a client that doesn't allow explicit \
+                                        content, and your message looked explicit, so it wasn't sent."
+                                       .to_owned())?
+                        } else {
+                            ctx.trans.queue_for_session(&other_session, Some(&format!(
+                                ansi!("<blue>{} whispers to {}: \"{}\"<reset>\n"),
+                                player_item.display_for_session(&ctx.session_dat),
+                                to_whom.display_for_session(&ctx.session_dat),
+                                say_what
+                            ))).await?;
+                        }
+                    }
+                }
             },
             _ => {}
         }

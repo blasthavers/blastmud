@@ -2,7 +2,7 @@ use serde::{Serialize, Deserialize};
 use std::collections::BTreeMap;
 use super::{user::{SkillType, StatType}, session::Session};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum BuffCause {
     WaitingTask { task_code: String, task_type: String },
     ByItem { item_code: String, item_type: String }
@@ -14,7 +14,7 @@ pub enum BuffImpact {
     ChangeSkill { stat: StatType, magnitude: i16 }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Buff {
     description: String,
     cause: BuffCause,
@@ -90,7 +90,7 @@ pub enum Subattack {
     Wrestling
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum LocationActionType {
     Normal,
     Sitting,
@@ -100,13 +100,13 @@ pub enum LocationActionType {
     Attacking(Subattack),
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Sex {
     Male,
     Female,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Item {
     pub item_code: String,
     pub item_type: String,

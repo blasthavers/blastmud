@@ -370,6 +370,21 @@ impl DBTrans {
         Ok(())
     }
 
+    pub async fn find_session_for_player(self: &Self, item_code: &str) -> DResult<Option<(ListenerSession, Session)>> {
+        Ok(self.pg_trans()?
+           .query_opt("SELECT u.current_listener, u.current_session, s.details \
+                       FROM users u JOIN sessions s ON s.session = u.current_session \
+                       WHERE u.username=$1", &[&item_code])
+           .await?
+           .and_then(|r| match (r.get("current_listener"), r.get("current_session"),
+                                r.get("details")) {
+               (Some(listener), Some(session), details) =>
+                   Some((ListenerSession { listener, session },
+                         serde_json::from_value(details).ok()?)),
+               _ => None
+           }))
+    }
+    
     pub async fn resolve_items_by_display_name_for_player<'l>(
         self: &Self,
         search: &'l ItemSearchParams<'l>
@@ -382,15 +397,16 @@ impl DBTrans {
                                    search.from_item.item_code);
         
         let (offset, query) = parse_offset(search.query);
-        let mut param_no: usize = 3;
+        let mut param_no: usize = 4;
         let query_wildcard = query.replace("\\", "\\\\")
               .replace("_", "\\_")
               .replace("%", "")
             .to_lowercase() + "%";
         let offset_sql = offset.map(|x| (if x >= 1 { x - 1 } else { x}) as i64).unwrap_or(0);
+        let query_len = query.len() as i32;
         let mut params: Vec<&(dyn ToSql + Sync)> = vec!(
             &query_wildcard,
-            &offset_sql);
+            &offset_sql, &query_len);
         
         
         if search.include_contents {
@@ -430,8 +446,8 @@ impl DBTrans {
             &format!(
                 "WITH {} SELECT details FROM relevant_items WHERE (lower(details->>'display') LIKE $1) \
                  OR (lower(details ->>'display_less_explicit') LIKE $1) \
-                 ORDER BY length(details->>'display') DESC \
-                 LIMIT 2 OFFSET $2", &cte_str),
+                 ORDER BY ABS(length(details->>'display')-$3) ASC \
+                 LIMIT 1 OFFSET $2", &cte_str),
             &params
         ).await?.into_iter()
                     .filter_map(|i| serde_json::from_value(i.get("details")).ok())
