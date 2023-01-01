@@ -9,7 +9,7 @@ use tokio_postgres::NoTls;
 use crate::message_handler::ListenerSession;
 use crate::DResult;
 use crate::message_handler::user_commands::parsing::parse_offset;
-use crate::models::{session::Session, user::User, item::Item};
+use crate::models::{session::Session, user::User, item::Item, task::TaskParse};
 use tokio_postgres::types::ToSql;
 use std::collections::BTreeSet;
 use std::sync::Arc;
@@ -453,6 +453,34 @@ impl DBTrans {
                     .filter_map(|i| serde_json::from_value(i.get("details")).ok())
                     .map(Arc::new)
                     .collect()))
+    }
+
+    pub async fn get_next_scheduled_task(&self) -> DResult<Option<TaskParse>> {
+        match self.pg_trans()?.query_opt(
+            "SELECT details FROM tasks WHERE \
+             CAST(details->>'next_scheduled' AS TIMESTAMPTZ) <= now() \
+             ORDER BY details->>'next_scheduled'", &[]
+        ).await? {
+            None => Ok(None),
+            Some(row) => Ok(serde_json::from_value(row.get("details"))?)
+        }
+    }
+
+    pub async fn delete_task(&self, task_type: &str, task_code: &str) -> DResult<()> {
+        self.pg_trans()?.execute(
+            "DELETE FROM tasks WHERE details->>'task_type' = $1 AND \
+            details->>'task_code' = $2", &[&task_type, &task_code]
+        ).await?;
+        Ok(())
+    }
+
+    pub async fn update_task(&self, task_type: &str, task_code: &str, task: &TaskParse) -> DResult<()> {
+        self.pg_trans()?.execute(
+            "UPDATE tasks SET details = $3 WHERE details->>'task_type' = $1 AND \
+             details->>'task_code' = $2",
+            &[&task_type, &task_code, &serde_json::to_value(task)?]
+        ).await?;
+        Ok(())
     }
     
     pub async fn commit(mut self: Self) -> DResult<()> {

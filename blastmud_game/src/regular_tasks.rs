@@ -1,9 +1,34 @@
 use tokio::{task, time, sync::oneshot};
-use crate::DResult;
-use crate::db;
+use async_trait::async_trait;
+use crate::{DResult, db, models::task::{Task, TaskParse, TaskRecurrence}};
 use crate::listener::{ListenerMap, ListenerSend};
 use blastmud_interfaces::MessageToListener;
 use log::warn;
+use once_cell::sync::OnceCell;
+use std::ops::AddAssign;
+use std::collections::BTreeMap;
+
+mod queued_command;
+
+pub struct TaskRunContext<'l> {
+    pub trans: &'l db::DBTrans,
+    pub task: &'l mut Task
+}
+
+#[async_trait]
+pub trait TaskHandler {
+    async fn do_task(&self, ctx: &mut TaskRunContext) -> DResult<()>;
+}
+
+fn task_handler_registry() -> &'static BTreeMap<&'static str, &'static (dyn TaskHandler + Sync + Send)> {
+    static TASK_HANDLER_REGISTRY: OnceCell<BTreeMap<&'static str, &'static (dyn TaskHandler + Sync + Send)>> =
+        OnceCell::new();
+    TASK_HANDLER_REGISTRY.get_or_init(
+        || vec!(
+            ("RunQueuedCommand", queued_command::HANDLER.clone())
+        ).into_iter().collect()
+    )
+}
 
 async fn cleanup_session_once(pool: db::DBPool) -> DResult<()> {
     for listener in pool.get_dead_listeners().await? {
@@ -74,8 +99,111 @@ fn start_send_queue_task(pool: db::DBPool, listener_map: ListenerMap) {
     });
 }
 
+async fn process_tasks_once(pool: db::DBPool) -> DResult<()> {
+    loop {
+        let tx = pool.start_transaction().await?;
+        match tx.get_next_scheduled_task().await? {
+            None => { break; }
+            Some(task_parse) => {
+                match task_parse {
+                    TaskParse::Known(mut task) => {
+                        match task_handler_registry().get(task.details.name()) {
+                            None => {
+                                warn!("Found a known but unregistered task type: {}",
+                                      task.details.name());
+                                // This is always a logic error, so just delete the task
+                                // to help with recovery.
+                                tx.delete_task(&task.details.name(), &task.meta.task_code).await?;
+                                tx.commit().await?;
+                            }
+                            Some(handler) => {
+                                let mut ctx = TaskRunContext { trans: &tx, task: &mut task };
+                                match handler.do_task(&mut ctx).await {
+                                    Err(e) => {
+                                        task.meta.consecutive_failure_count += 1;
+                                        warn!("Error handling event of type {} code {} (consecutive count: {}): {:?}",
+                                              &task.details.name(), &task.meta.task_code,
+                                              task.meta.consecutive_failure_count, e);
+                                        if task.meta.consecutive_failure_count > 3 && !task.meta.is_static {
+                                            tx.delete_task(&task.details.name(), &task.meta.task_code).await?;
+                                        } else {
+                                            task.meta.next_scheduled.add_assign(
+                                                chrono::Duration::seconds(60)
+                                            );
+                                            tx.update_task(&task.details.name(), &task.meta.task_code,
+                                                           &TaskParse::Known(task.clone())).await?;
+                                        }
+                                        tx.commit().await?;
+                                    },
+                                    Ok(()) => {
+                                        task.meta.consecutive_failure_count = 0;
+                                        match task.meta.recurrence {
+                                            None => {
+                                                tx.delete_task(&task.details.name(),
+                                                               &task.meta.task_code).await?;
+                                            }
+                                            Some(TaskRecurrence::FixedDuration { seconds }) => {
+                                                task.meta.next_scheduled.add_assign(
+                                                    chrono::Duration::seconds(seconds as i64)
+                                                );
+                                                tx.update_task(&task.details.name(), &task.meta.task_code,
+                                                               &TaskParse::Known(task.clone())).await?;
+                                            }
+                                        }
+                                        tx.commit().await?;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    TaskParse::Unknown(mut task) => {
+                        warn!("Found unknown task type: {}, code: {}",
+                              &task.task_type, &task.meta.task_code);
+                        if task.meta.is_static {
+                            // Probably a new (or newly removed) static type.
+                            // We just skip this tick of it.
+                            match task.meta.recurrence {
+                                None => {
+                                    tx.delete_task(&task.task_type, &task.meta.task_code).await?;
+                                    tx.commit().await?;
+                                }
+                                Some(TaskRecurrence::FixedDuration { seconds }) => {
+                                    task.meta.next_scheduled.add_assign(
+                                        chrono::Duration::seconds(seconds as i64)
+                                    );
+                                    tx.update_task(&task.task_type, &task.meta.task_code,
+                                                   &TaskParse::Unknown(task.clone())).await?;
+                                }
+                            }
+                        } else {
+                            tx.delete_task(&task.task_type, &task.meta.task_code).await?;
+                            tx.commit().await?;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn start_task_runner(pool: db::DBPool) {
+    task::spawn(async move {
+        loop {
+            time::sleep(time::Duration::from_secs(1)).await;
+            match process_tasks_once(pool.clone()).await {
+                Ok(()) => {}
+                Err(e) => {
+                    warn!("Error processing tasks: {}", e);
+                }
+            }
+        }
+    });
+}
+
 pub fn start_regular_tasks(pool: &db::DBPool, listener_map: ListenerMap) -> DResult<()> {
     start_session_cleanup_task(pool.clone());
     start_send_queue_task(pool.clone(), listener_map);
+    start_task_runner(pool.clone());
     Ok(())
 }
