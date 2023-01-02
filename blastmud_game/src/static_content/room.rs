@@ -271,6 +271,11 @@ pub fn room_list() -> &'static Vec<Room> {
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
                 ),
                 should_caption: false,
             },
@@ -360,6 +365,11 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                     Exit {
                         direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
@@ -1041,6 +1051,11 @@ pub fn room_list() -> &'static Vec<Room> {
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
                 ),
                 should_caption: false,
             },
@@ -1130,6 +1145,11 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                     Exit {
                         direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::WEST,
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
@@ -1379,12 +1399,738 @@ pub fn room_list() -> &'static Vec<Room> {
                 grid_coords: GridCoords { x: 13, y: 10, z: 0 },
                 exits: vec!(
                     Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_latrobest_210",
+                name: "La Trobe St - 210 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A moderately wide road that is now overgrown and completely covered in weeds",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 2, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_latrobesst_200",
+                name: "La Trobe St - 200 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A moderately wide road that is now overgrown and completely covered in weeds",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 3, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_latrobest_190",
+                name: "La Trobe St - 190 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A moderately wide road that is now overgrown and completely covered in weeds",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 4, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamstlatrobest",
+                name: "Williams St & La Trobe St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "An intersection of an overgrown weedy road with a wide road with rusted tram tracks in the middle. Potholes dot the visible road surfaces",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_latrobest_180",
+                name: "La Trobe St - 180 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A moderately wide road that is now overgrown and completely covered in weeds",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 6, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_latrobest_170",
+                name: "La Trobe St - 170 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A moderately wide road that is now overgrown and completely covered in weeds",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 7, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_latrobest_160",
+                name: "La Trobe St - 160 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A moderately wide road that is now overgrown and completely covered in weeds",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 8, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_latrobest",
+                name: "Queen St & La Trobe St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "Two relatively wide roads intersects; the road running east to west is overgrown with weeds, while the road running to the south has been kept slightly clearer",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_latrobest_150",
+                name: "La Trobe St - 150 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A moderately wide road that is now overgrown and completely covered in weeds",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 6, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_latrobest_140",
+                name: "La Trobe St - 140 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A moderately wide road that is now overgrown and completely covered in weeds",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 7, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_latrobest_130",
+                name: "La Trobe St - 130 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A moderately wide road that is now overgrown and completely covered in weeds",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 8, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_latrobest",
+                name: "Elizabeth St & La Trobe St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "A moderately wide road that is now overgrown and completely covered in weeds intersects a wide road stained from years of neglect",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_latrobest_120",
+                name: "La Trobe St - 120 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A moderately wide road that is now overgrown and completely covered in weeds",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 10, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_latrobest_110",
+                name: "La Trobe St - 110 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A moderately wide road that is now overgrown and completely covered in weeds",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 11, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_latrobest_100",
+                name: "La Trobe St - 100 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A moderately wide road that is now overgrown and completely covered in weeds",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 12, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_lonsdalest_210",
+                name: "Lonsdale St - 210 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 2, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_lonsdalest_200",
+                name: "Lonsdale St - 200 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 3, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_lonsdalest_190",
+                name: "Lonsdale St - 190 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 4, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamstlonsdalest",
+                name: "Williams St & Lonsdale St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "An intersection of two moderately wide roads, both poorly maintained",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamstlatrobest",
+                name: "Williams St & La Trobe St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "An intersection of an overgrown weedy road with a wide road with rusted tram tracks in the middle. Potholes dot the visible road surfaces",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: -5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_lonsdalest_180",
+                name: "Lonsdale St - 180 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 6, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_lonsdalest_170",
+                name: "Lonsdale St - 170 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 7, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_lonsdalest_160",
+                name: "Lonsdale St - 160 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 8, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_lonsdalest",
+                name: "Queen St & Lonsdale St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "A relatively wide roads intersects a narrower road; both roads are littered with potholes in which weeds have set root",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_lonsdalest_150",
+                name: "Lonsdale St - 150 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 6, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_lonsdalest_140",
+                name: "Lonsdale St - 140 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 7, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_lonsdalest_130",
+                name: "Lonsdale St - 130 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 8, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_lonsdalest",
+                name: "Elizabeth St & Lonsdale St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "A pot-holded two-lane each way road intersects a wide road stained from years of neglect",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
                         direction: Direction::NORTH,
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
                     Exit {
                         direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_lonsdalest_120",
+                name: "Lonsdale St - 120 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 10, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_lonsdalest_110",
+                name: "Lonsdale St - 110 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 11, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_lonsdalest_100",
+                name: "Lonsdale St - 100 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 12, y: -1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
