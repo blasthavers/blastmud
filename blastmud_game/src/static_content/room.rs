@@ -243,7 +243,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
-                        target: ExitTarget::Custom("room/melbs_kingst_500"),
+                        target: ExitTarget::Custom("room/melbs_kingst_50"),
                         exit_type: ExitType::Free
                     })
             },
@@ -252,12 +252,12 @@ pub fn room_list() -> &'static Vec<Room> {
             Room {
                 zone: "melbs",
                 secondary_zones: vec!(),
-                code: "melbs_kingst_200",
-                name: "King Street - 200 block",
-                short: ansi!("<yellow>||<reset>"),
-                description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                code: "melbs_kingst_latrobest",
+                name: "King Street & Latrobe St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "A wide road (5 lanes each way) intersects a narrower 3 lane road. Both have been rather poorly maintained. Potholes dot the ashphalt road.",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 1, y: -3, z: 0 },
+                grid_coords: GridCoords { x: 1, y: -5, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::SOUTH,
@@ -269,8 +269,52 @@ pub fn room_list() -> &'static Vec<Room> {
             Room {
                 zone: "melbs",
                 secondary_zones: vec!(),
-                code: "melbs_kingst_300",
-                name: "King Street - 300 block",
+                code: "melbs_kingst_10",
+                name: "King Street - 10 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: -4, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_20",
+                name: "King Street - 20 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: -3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_30",
+                name: "King Street - 30 block",
                 short: ansi!("<yellow>||<reset>"),
                 description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
                 description_less_explicit: None,
@@ -291,10 +335,10 @@ pub fn room_list() -> &'static Vec<Room> {
             Room {
                 zone: "melbs",
                 secondary_zones: vec!(),
-                code: "melbs_kingst_400",
-                name: "King Street - 400 block",
-                short: ansi!("<yellow>||<reset>"),
-                description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                code: "melbs_kingst_lonsdalest",
+                name: "King Street & Lonsdale St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "A wide road (5 lanes each way) intersects a narrower 2 lane each way road. Both have been rather poorly maintained. Potholes dot the ashphalt road",
                 description_less_explicit: None,
                 grid_coords: GridCoords { x: 1, y: -1, z: 0 },
                 exits: vec!(
@@ -312,6 +356,29 @@ pub fn room_list() -> &'static Vec<Room> {
             },
             Room {
                 zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_40",
+                name: ansi!("King Street - 40 block"),
+                short: ansi!("<yellow>||<reset>"),
+                description: ansi!(
+                    "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side"),
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: 0, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            }, 
+            Room {
+                zone: "melbs",
                 secondary_zones: vec!(
                     SecondaryZoneRecord {
                         zone: "repro_xv",
@@ -319,13 +386,13 @@ pub fn room_list() -> &'static Vec<Room> {
                         grid_coords: GridCoords { x: 1, y: 0, z: 0 }
                     }
                 ),
-                code: "melbs_kingst_500",
-                name: ansi!("King Street - 500 block"),
+                code: "melbs_kingst_50",
+                name: ansi!("King Street - 50 block"),
                 short: ansi!("<yellow>||<reset>"),
                 description: ansi!(
                     "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side"),
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 1, y: 0, z: 0 },
+                grid_coords: GridCoords { x: 1, y: 1, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::EAST,
@@ -347,12 +414,12 @@ pub fn room_list() -> &'static Vec<Room> {
             Room {
                 zone: "melbs",
                 secondary_zones: vec!(),
-                code: "melbs_kingst_600",
-                name: "King Street - 600 block",
+                code: "melbs_kingst_60",
+                name: "King Street - 60 block",
                 short: ansi!("<yellow>||<reset>"),
                 description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 1, y: 1, z: 0 },
+                grid_coords: GridCoords { x: 1, y: 2, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -369,12 +436,188 @@ pub fn room_list() -> &'static Vec<Room> {
             Room {
                 zone: "melbs",
                 secondary_zones: vec!(),
-                code: "melbs_kingst_700",
-                name: "King Street - 700 block",
+                code: "melbs_kingst_bourkest",
+                name: "King Street & Bourke St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "A wide road (5 lanes each way) intersects a slightly narrower 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt road.",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_70",
+                name: "King Street - 70 block",
                 short: ansi!("<yellow>||<reset>"),
                 description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 1, y: 2, z: 0 },
+                grid_coords: GridCoords { x: 1, y: 4, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_80",
+                name: "King Street - 80 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: 5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_90",
+                name: "King Street - 90 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: 6, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_collinsst",
+                name: "King Street & Collins St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "A wide road (5 lanes each way) intersects another wide 4-lane road. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_100",
+                name: "King Street - 100 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: 8, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_110",
+                name: "King Street - 110 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: 9, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_120",
+                name: "King Street - 120 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: 10, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                )
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_kingst_flinderst",
+                name: "King Street & Flinders St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "A wide road (5 lanes each way) intersects a wide road with rusted tram tracks in the middle. Potholes dot the ashphalt road.",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 1, y: 11, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -382,7 +625,7 @@ pub fn room_list() -> &'static Vec<Room> {
                         exit_type: ExitType::Free
                     },
                 )
-            },
+            },            
         ).into_iter().collect())
 }
 

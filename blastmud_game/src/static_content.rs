@@ -55,9 +55,11 @@ async fn refresh_static_items(pool: &DBPool) -> DResult<()> {
             (type_group.items)().map(|x| (x.item_code.to_owned(), x)).collect();
         let expected_set: BTreeSet<String> = expected_items.keys().map(|x|x.to_owned()).collect();
         for unwanted_item in existing_items.difference(&expected_set) {
+            info!("Deleting item {:?}", unwanted_item);
             tx.delete_static_items_by_code(type_group.item_type, unwanted_item).await?;
         }
         for new_item_code in expected_set.difference(&existing_items) {
+            info!("Creating item {:?}", new_item_code);
             tx.create_item(&(expected_items.get(new_item_code)
                              .unwrap().initial_item)()).await?;
         }

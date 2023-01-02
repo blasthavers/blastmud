@@ -336,8 +336,8 @@ impl DBTrans {
                                              item_code: &str) -> DResult<()> {
         self.pg_trans()?.query(
             "DELETE FROM items WHERE details->>'is_static' = 'true' AND \
-               details->>'item_type' = {} AND \
-               details->>'item_code' = {}",
+               details->>'item_type' = $1 AND \
+               details->>'item_code' = $2",
             &[&item_type, &item_code]).await?;
         Ok(())
     }
