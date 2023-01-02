@@ -31,6 +31,18 @@ pub struct TaskMeta {
     pub next_scheduled: DateTime<Utc>,
 }
 
+impl Default for TaskMeta {
+    fn default() -> Self {
+        Self {
+            task_code: "unspecified".to_string(),
+            is_static: false,
+            recurrence: None,
+            consecutive_failure_count: 0,
+            next_scheduled: Utc::now() + chrono::Duration::seconds(3600)
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Task {
     #[serde(flatten)]

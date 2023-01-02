@@ -9,7 +9,12 @@ use tokio_postgres::NoTls;
 use crate::message_handler::ListenerSession;
 use crate::DResult;
 use crate::message_handler::user_commands::parsing::parse_offset;
-use crate::models::{session::Session, user::User, item::Item, task::TaskParse};
+use crate::models::{
+    session::Session,
+    user::User,
+    item::Item,
+    task::{Task, TaskParse}
+};
 use tokio_postgres::types::ToSql;
 use std::collections::BTreeSet;
 use std::sync::Arc;
@@ -474,6 +479,15 @@ impl DBTrans {
         Ok(())
     }
 
+    pub async fn upsert_task(&self, task: &Task) -> DResult<()> {
+        self.pg_trans()?.execute(
+            "INSERT INTO tasks (details) \
+             VALUES ($1) \
+             ON CONFLICT ((details->>'task_code'), (details->>'task_type')) \
+             DO UPDATE SET details = $1", &[&serde_json::to_value(task)?]).await?;
+        Ok(())
+    }
+    
     pub async fn update_task(&self, task_type: &str, task_code: &str, task: &TaskParse) -> DResult<()> {
         self.pg_trans()?.execute(
             "UPDATE tasks SET details = $3 WHERE details->>'task_type' = $1 AND \

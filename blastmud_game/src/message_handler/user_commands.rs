@@ -16,7 +16,7 @@ mod ignore;
 mod less_explicit_mode;
 mod login;
 mod look;
-mod movement;
+pub mod movement;
 pub mod parsing;
 mod quit;
 mod register;

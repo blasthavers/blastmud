@@ -3,6 +3,7 @@ use once_cell::sync::OnceCell;
 use std::collections::BTreeMap;
 use ansi::ansi;
 use async_trait::async_trait;
+use serde::{Serialize, Deserialize};
 use crate::message_handler::user_commands::{
     UResult, VerbContext
 };
@@ -47,7 +48,7 @@ impl GridCoords {
             Direction::SOUTHWEST => GridCoords {x: self.x - 1, y: self.y + 1, ..*self},
             Direction::UP => GridCoords {z: self.z + 1, ..*self},
             Direction::DOWN => GridCoords {z: self.z - 1, ..*self},
-            Direction::IN(_) => self.clone()
+            Direction::IN { .. } => self.clone()
         }
     }
 }
@@ -70,7 +71,7 @@ pub enum ExitType {
 }
 
 #[allow(dead_code)]
-#[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Debug)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Debug, Serialize, Deserialize)]
 pub enum Direction {
     NORTH,
     SOUTH,
@@ -82,23 +83,23 @@ pub enum Direction {
     SOUTHWEST,
     UP,
     DOWN,
-    IN(&'static str)
+    IN { item: String }
 }
 
 impl Direction {
-    pub fn describe(self: &Self) -> &'static str {
+    pub fn describe(self: &Self) -> String {
         match self {
-            Direction::NORTH => "north",
-            Direction::SOUTH => "south",
-            Direction::EAST => "east",
-            Direction::WEST => "west",
-            Direction::NORTHEAST => "northeast",
-            Direction::SOUTHEAST => "southeast",
-            Direction::NORTHWEST => "northwest",
-            Direction::SOUTHWEST => "southwest",
-            Direction::UP => "up",
-            Direction::DOWN => "down",
-            Direction::IN(s) => s
+            Direction::NORTH => "north".to_owned(),
+            Direction::SOUTH => "south".to_owned(),
+            Direction::EAST => "east".to_owned(),
+            Direction::WEST => "west".to_owned(),
+            Direction::NORTHEAST => "northeast".to_owned(),
+            Direction::SOUTHEAST => "southeast".to_owned(),
+            Direction::NORTHWEST => "northwest".to_owned(),
+            Direction::SOUTHWEST => "southwest".to_owned(),
+            Direction::UP => "up".to_owned(),
+            Direction::DOWN => "down".to_owned(),
+            Direction::IN { item } => item.to_owned()
         }
     }
 

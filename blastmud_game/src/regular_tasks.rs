@@ -7,8 +7,9 @@ use log::warn;
 use once_cell::sync::OnceCell;
 use std::ops::AddAssign;
 use std::collections::BTreeMap;
+use chrono::Utc;
 
-mod queued_command;
+pub mod queued_command;
 
 pub struct TaskRunContext<'l> {
     pub trans: &'l db::DBTrans,
@@ -17,7 +18,7 @@ pub struct TaskRunContext<'l> {
 
 #[async_trait]
 pub trait TaskHandler {
-    async fn do_task(&self, ctx: &mut TaskRunContext) -> DResult<()>;
+    async fn do_task(&self, ctx: &mut TaskRunContext) -> DResult<Option<time::Duration>>;
 }
 
 fn task_handler_registry() -> &'static BTreeMap<&'static str, &'static (dyn TaskHandler + Sync + Send)> {
@@ -88,7 +89,7 @@ async fn process_sendqueue_once(pool: db::DBPool, listener_map: ListenerMap) -> 
 fn start_send_queue_task(pool: db::DBPool, listener_map: ListenerMap) {
     task::spawn(async move {
         loop {
-            time::sleep(time::Duration::from_secs(1)).await;
+            time::sleep(time::Duration::from_millis(500)).await;
             match process_sendqueue_once(pool.clone(), listener_map.clone()).await {
                 Ok(()) => {}
                 Err(e) => {
@@ -127,25 +128,23 @@ async fn process_tasks_once(pool: db::DBPool) -> DResult<()> {
                                         if task.meta.consecutive_failure_count > 3 && !task.meta.is_static {
                                             tx.delete_task(&task.details.name(), &task.meta.task_code).await?;
                                         } else {
-                                            task.meta.next_scheduled.add_assign(
-                                                chrono::Duration::seconds(60)
-                                            );
+                                            task.meta.next_scheduled = Utc::now() + chrono::Duration::seconds(60);
                                             tx.update_task(&task.details.name(), &task.meta.task_code,
                                                            &TaskParse::Known(task.clone())).await?;
                                         }
                                         tx.commit().await?;
                                     },
-                                    Ok(()) => {
+                                    Ok(resched) => {
                                         task.meta.consecutive_failure_count = 0;
-                                        match task.meta.recurrence {
+                                        match task.meta.recurrence.clone().or(
+                                            resched.map(|r| TaskRecurrence::FixedDuration { seconds: r.as_secs() as u32 })) {
                                             None => {
                                                 tx.delete_task(&task.details.name(),
                                                                &task.meta.task_code).await?;
                                             }
                                             Some(TaskRecurrence::FixedDuration { seconds }) => {
-                                                task.meta.next_scheduled.add_assign(
-                                                    chrono::Duration::seconds(seconds as i64)
-                                                );
+                                                task.meta.next_scheduled = Utc::now() +
+                                                    chrono::Duration::seconds(seconds as i64);
                                                 tx.update_task(&task.details.name(), &task.meta.task_code,
                                                                &TaskParse::Known(task.clone())).await?;
                                             }
@@ -190,7 +189,7 @@ async fn process_tasks_once(pool: db::DBPool) -> DResult<()> {
 fn start_task_runner(pool: db::DBPool) {
     task::spawn(async move {
         loop {
-            time::sleep(time::Duration::from_secs(1)).await;
+            time::sleep(time::Duration::from_millis(500)).await;
             match process_tasks_once(pool.clone()).await {
                 Ok(()) => {}
                 Err(e) => {
