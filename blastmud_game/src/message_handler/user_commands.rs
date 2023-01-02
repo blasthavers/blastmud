@@ -16,6 +16,7 @@ mod ignore;
 mod less_explicit_mode;
 mod login;
 mod look;
+mod map;
 pub mod movement;
 pub mod parsing;
 mod quit;
@@ -98,6 +99,7 @@ static REGISTERED_COMMANDS: UserVerbRegistry = phf_map! {
     "l" => look::VERB,
     "look" => look::VERB,
     "read" => look::VERB,
+    "lmap" => map::VERB,
     "-" => whisper::VERB,
     "whisper" => whisper::VERB,
 };
