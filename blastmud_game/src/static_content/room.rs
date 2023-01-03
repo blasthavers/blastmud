@@ -120,6 +120,7 @@ impl Direction {
     }
 }
 
+#[derive(Eq,Ord,Debug,PartialEq,PartialOrd,Clone)]
 pub enum ExitTarget {
     UseGPS,
     Custom(&'static str)
@@ -2816,7 +2817,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
-            },
+            }
 
         ).into_iter().collect())
 }
@@ -2872,7 +2873,9 @@ pub fn resolve_exit(room: &Room, exit: &Exit) -> Option<&'static Room> {
 
 #[cfg(test)]
 mod test {
+    use itertools::Itertools;
     use super::*;
+
     #[test]
     fn room_zones_should_exist() {
         for room in room_list() {
@@ -2886,4 +2889,25 @@ mod test {
         assert_eq!(room_map_by_code().get("repro_xv_chargen").expect("repro_xv_chargen to exist").code,
                    "repro_xv_chargen");
     }
+
+    #[test]
+    fn grid_coords_should_be_unique_in_zone() {
+        let mut roomlist: Vec<&'static Room> = room_list().iter().collect();
+        roomlist.sort_unstable_by(
+            |a,b|
+            a.grid_coords.cmp(&b.grid_coords)
+                .then(a.zone.cmp(&b.zone)));
+        let dups : Vec<Vec<(&'static str, &'static GridCoords, &'static str)>> =
+            room_list().iter()
+            .group_by(|x| (&x.grid_coords, x.zone))
+            .into_iter()
+            .map(|((coord, zone), rg)|
+                 rg.map(|r| (r.name, coord, zone))
+                 .collect::<Vec<(&str, &GridCoords, &str)>>())
+            .filter(|x| x.len() > 1)
+            .collect();
+        assert_eq!(dups,
+                   Vec::<Vec<(&str, &GridCoords, &str)>>::new());
+    }
+    
 }
