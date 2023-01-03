@@ -479,6 +479,11 @@ pub fn room_list() -> &'static Vec<Room> {
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
                 ),
                 should_caption: false,
             },
@@ -2139,7 +2144,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_williamsst_10",
-                name: "Williams Street - 10 block",
+                name: "Williams St - 10 block",
                 short: ansi!("<yellow>||<reset>"),
                 description: "A moderately wide road with a long crack in the asphalt running along its length",
                 description_less_explicit: None,
@@ -2162,7 +2167,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_williamsst_20",
-                name: "Williams Street - 20 block",
+                name: "Williams St - 20 block",
                 short: ansi!("<yellow>||<reset>"),
                 description: "A moderately wide road with a long crack in the asphalt running along its length",
                 description_less_explicit: None,
@@ -2185,7 +2190,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_williamsst_30",
-                name: "Williams Street - 30 block",
+                name: "Williams St - 30 block",
                 short: ansi!("<yellow>||<reset>"),
                 description: "A moderately wide road with a long crack in the asphalt running along its length",
                 description_less_explicit: None,
@@ -2208,7 +2213,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_williamsst_40",
-                name: ansi!("Williams Street - 40 block"),
+                name: ansi!("Williams St - 40 block"),
                 short: ansi!("<yellow>||<reset>"),
                 description: ansi!(
                     "A moderately wide road with a long crack in the asphalt running along its length"),
@@ -2232,18 +2237,13 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_williamsst_50",
-                name: ansi!("Williams Street - 50 block"),
+                name: ansi!("Williams St - 50 block"),
                 short: ansi!("<yellow>||<reset>"),
                 description: ansi!(
                     "A moderately wide road with a long crack in the asphalt running along its length"),
                 description_less_explicit: None,
                 grid_coords: GridCoords { x: 5, y: 1, z: 0 },
                 exits: vec!(
-                    Exit {
-                        direction: Direction::EAST,
-                        target: ExitTarget::Custom("room/repro_xv_lobby"),
-                        exit_type: ExitType::Free
-                    },
                     Exit {
                         direction: Direction::NORTH,
                         target: ExitTarget::UseGPS,
@@ -2261,7 +2261,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_williamsst_60",
-                name: "Williams Street - 60 block",
+                name: "Williams St - 60 block",
                 short: ansi!("<yellow>||<reset>"),
                 description: "A moderately wide road with a long crack in the asphalt running along its length",
                 description_less_explicit: None,
@@ -2284,7 +2284,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_williamsst_bourkest",
-                name: "Williams Street & Bourke St",
+                name: "Williams St & Bourke St",
                 short: ansi!("<yellow>##<reset>"),
                 description: "A moderately wide road with a long crack in the asphalt running along its length intersects a 4-lane road with wide but heavily cracked concrete footpaths",
                 description_less_explicit: None,
@@ -2300,6 +2300,16 @@ pub fn room_list() -> &'static Vec<Room> {
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
                 ),
                 should_caption: false,
             },
@@ -2307,7 +2317,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_williamsst_70",
-                name: "Williams Street - 70 block",
+                name: "Williams St - 70 block",
                 short: ansi!("<yellow>||<reset>"),
                 description: "A moderately wide road with a long crack in the asphalt running along its length",
                 description_less_explicit: None,
@@ -2330,7 +2340,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_williamsst_80",
-                name: "Williams Street - 80 block",
+                name: "Williams St - 80 block",
                 short: ansi!("<yellow>||<reset>"),
                 description: "A moderately wide road with a long crack in the asphalt running along its length",
                 description_less_explicit: None,
@@ -2353,7 +2363,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_williamsst_90",
-                name: "Williams Street - 90 block",
+                name: "Williams St - 90 block",
                 short: ansi!("<yellow>||<reset>"),
                 description: "A moderately wide road with a long crack in the asphalt running along its length",
                 description_less_explicit: None,
@@ -2376,7 +2386,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_williamsst_collinsst",
-                name: "Williams Street & Collins St",
+                name: "Williams St & Collins St",
                 short: ansi!("<yellow>##<reset>"),
                 description: "A moderately wide road with a long crack in the asphalt running along its length intersects a wide 4-lane road. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
                 description_less_explicit: None,
@@ -2399,7 +2409,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_williamsst_100",
-                name: "Williams Street - 100 block",
+                name: "Williams St - 100 block",
                 short: ansi!("<yellow>||<reset>"),
                 description: "A moderately wide road with a long crack in the asphalt running along its length",
                 description_less_explicit: None,
@@ -2422,7 +2432,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_williamsst_110",
-                name: "Williams Street - 110 block",
+                name: "Williams St - 110 block",
                 short: ansi!("<yellow>||<reset>"),
                 description: "A moderately wide road with a long crack in the asphalt running along its length",
                 description_less_explicit: None,
@@ -2445,7 +2455,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_williamsst_120",
-                name: "Williams Street - 120 block",
+                name: "Williams St - 120 block",
                 short: ansi!("<yellow>||<reset>"),
                 description: "A moderately wide road with a long crack in the asphalt running along its length",
                 description_less_explicit: None,
@@ -2458,6 +2468,349 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                     Exit {
                         direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_bourkest_210",
+                name: "Bourke St - 210 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 2, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_bourkest_200",
+                name: "Bourke St - 200 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 3, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_bourkest_190",
+                name: "Bourke St - 190 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 4, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_bourkest_180",
+                name: "Bourke St - 180 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 6, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_bourkest_170",
+                name: "Bourke St - 170 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 7, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_bourkest_160",
+                name: "Bourke St - 160 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 8, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_bourkest",
+                name: "Queen St & Bourke St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "A relatively wide roads intersects a narrower road; both roads are littered with potholes in which weeds have set root",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_bourkest_150",
+                name: "Bourke St - 150 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 6, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_bourkest_140",
+                name: "Bourke St - 140 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 7, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_bourkest_130",
+                name: "Bourke St - 130 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 8, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_bourkest",
+                name: "Elizabeth St & Bourke St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "A pot-holded two-lane each way road intersects a wide road stained from years of neglect",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_bourkest_120",
+                name: "Bourke St - 120 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 10, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_bourkest_110",
+                name: "Bourke St - 110 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 11, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_bourkest_100",
+                name: "Bourke St - 100 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 12, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
