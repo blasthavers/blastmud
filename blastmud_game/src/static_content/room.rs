@@ -747,6 +747,11 @@ pub fn room_list() -> &'static Vec<Room> {
                 grid_coords: GridCoords { x: 5, y: 11, z: 0 },
                 exits: vec!(
                     Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
                         direction: Direction::WEST,
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
@@ -1501,9 +1506,15 @@ pub fn room_list() -> &'static Vec<Room> {
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
                 ),
                 should_caption: false,
             },
+            
             Room {
                 zone: "melbs",
                 secondary_zones: vec!(),
@@ -1847,33 +1858,19 @@ pub fn room_list() -> &'static Vec<Room> {
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
-                ),
-                should_caption: false,
-            },
-            Room {
-                zone: "melbs",
-                secondary_zones: vec!(),
-                code: "melbs_williamstlatrobest",
-                name: "Williams St & La Trobe St",
-                short: ansi!("<yellow>##<reset>"),
-                description: "An intersection of an overgrown weedy road with a wide road with rusted tram tracks in the middle. Potholes dot the visible road surfaces",
-                description_less_explicit: None,
-                grid_coords: GridCoords { x: 5, y: -5, z: 0 },
-                exits: vec!(
                     Exit {
-                        direction: Direction::WEST,
+                        direction: Direction::NORTH,
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
                     Exit {
-                        direction: Direction::EAST,
+                        direction: Direction::SOUTH,
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
                 ),
                 should_caption: false,
             },
-            
             Room {
                 zone: "melbs",
                 secondary_zones: vec!(),
@@ -2138,6 +2135,335 @@ pub fn room_list() -> &'static Vec<Room> {
                 should_caption: false,
             },
             
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamsst_10",
+                name: "Williams Street - 10 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A moderately wide road with a long crack in the asphalt running along its length",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: -4, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamsst_20",
+                name: "Williams Street - 20 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A moderately wide road with a long crack in the asphalt running along its length",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: -3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamsst_30",
+                name: "Williams Street - 30 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A moderately wide road with a long crack in the asphalt running along its length",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: -2, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamsst_40",
+                name: ansi!("Williams Street - 40 block"),
+                short: ansi!("<yellow>||<reset>"),
+                description: ansi!(
+                    "A moderately wide road with a long crack in the asphalt running along its length"),
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: 0, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            }, 
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamsst_50",
+                name: ansi!("Williams Street - 50 block"),
+                short: ansi!("<yellow>||<reset>"),
+                description: ansi!(
+                    "A moderately wide road with a long crack in the asphalt running along its length"),
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: 1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::Custom("room/repro_xv_lobby"),
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            }, 
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamsst_60",
+                name: "Williams Street - 60 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A moderately wide road with a long crack in the asphalt running along its length",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: 2, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamsst_bourkest",
+                name: "Williams Street & Bourke St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "A moderately wide road with a long crack in the asphalt running along its length intersects a 4-lane road with wide but heavily cracked concrete footpaths",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: 3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamsst_70",
+                name: "Williams Street - 70 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A moderately wide road with a long crack in the asphalt running along its length",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: 4, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamsst_80",
+                name: "Williams Street - 80 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A moderately wide road with a long crack in the asphalt running along its length",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: 5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamsst_90",
+                name: "Williams Street - 90 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A moderately wide road with a long crack in the asphalt running along its length",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: 6, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamsst_collinsst",
+                name: "Williams Street & Collins St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "A moderately wide road with a long crack in the asphalt running along its length intersects a wide 4-lane road. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamsst_100",
+                name: "Williams Street - 100 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A moderately wide road with a long crack in the asphalt running along its length",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: 8, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamsst_110",
+                name: "Williams Street - 110 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A moderately wide road with a long crack in the asphalt running along its length",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: 9, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_williamsst_120",
+                name: "Williams Street - 120 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A moderately wide road with a long crack in the asphalt running along its length",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 5, y: 10, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
 
         ).into_iter().collect())
 }
