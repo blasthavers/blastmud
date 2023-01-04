@@ -577,6 +577,11 @@ pub fn room_list() -> &'static Vec<Room> {
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
                 ),
                 should_caption: false,
             },
@@ -845,10 +850,15 @@ pub fn room_list() -> &'static Vec<Room> {
                 code: "melbs_queenst_flindersst",
                 name: "Queen St & Flinders St",
                 short: ansi!("<yellow>##<reset>"),
-                description: "A wide road with rusted tram tracks in the middle. Potholes dot the ashphalt road",
+                description: "A wide road with rusted tram tracks in the middle intersects another wide road. Potholes dot the ashphalt",
                 description_less_explicit: None,
                 grid_coords: GridCoords { x: 9, y: 11, z: 0 },
                 exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
                     Exit {
                         direction: Direction::WEST,
                         target: ExitTarget::UseGPS,
@@ -870,7 +880,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A wide road with rusted tram tracks in the middle. Potholes dot the ashphalt road",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 6, y: 11, z: 0 },
+                grid_coords: GridCoords { x: 10, y: 11, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -893,7 +903,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A wide road with rusted tram tracks in the middle. Potholes dot the ashphalt road",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 7, y: 11, z: 0 },
+                grid_coords: GridCoords { x: 11, y: 11, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -916,7 +926,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A wide road with rusted tram tracks in the middle. Potholes dot the ashphalt road",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 8, y: 11, z: 0 },
+                grid_coords: GridCoords { x: 12, y: 11, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -937,10 +947,15 @@ pub fn room_list() -> &'static Vec<Room> {
                 code: "melbs_elizabethst_flindersst",
                 name: "Elizabeth St & Flinders St",
                 short: ansi!("<yellow>##<reset>"),
-                description: "A wide road with rusted tram tracks in the middle. Potholes dot the ashphalt road",
+                description: "A wide road with rusted tram tracks in the middle intersects a wide road stained from years of neglect. Potholes dot the ashphalt",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 9, y: 11, z: 0 },
+                grid_coords: GridCoords { x: 13, y: 11, z: 0 },
                 exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
                     Exit {
                         direction: Direction::WEST,
                         target: ExitTarget::UseGPS,
@@ -962,7 +977,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A wide road with rusted tram tracks in the middle. Potholes dot the ashphalt road",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 10, y: 11, z: 0 },
+                grid_coords: GridCoords { x: 14, y: 11, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -985,7 +1000,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A wide road with rusted tram tracks in the middle. Potholes dot the ashphalt road",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 11, y: 11, z: 0 },
+                grid_coords: GridCoords { x: 15, y: 11, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -1008,7 +1023,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A wide road with rusted tram tracks in the middle. Potholes dot the ashphalt road",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 12, y: 11, z: 0 },
+                grid_coords: GridCoords { x: 16, y: 11, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -1027,11 +1042,11 @@ pub fn room_list() -> &'static Vec<Room> {
                 zone: "melbs",
                 secondary_zones: vec!(),
                 code: "melbs_swanstonst_flindersst",
-                name: "Elizabeth St & Flinders St",
+                name: "Swanston St & Flinders St",
                 short: ansi!("<yellow>##<reset>"),
                 description: "The intersection of two wide roads, with rusted tram tracks and infrastructure in the middle. Crumbling bollards line all corners of the intersection, and potholes dot the ashphalt road",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: 11, z: 0 },
+                grid_coords: GridCoords { x: 17, y: 11, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -1055,7 +1070,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>##<reset>"),
                 description: "A dilapidated major tram thoroughfare intersects a narrower 3 lane road. Both have been rather poorly maintained. Potholes dot the ashphalt road",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: -5, z: 0 },
+                grid_coords: GridCoords { x: 17, y: -5, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::SOUTH,
@@ -1078,7 +1093,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>||<reset>"),
                 description: "A road that looks to have been a major tram thoroughfare before the collapse. Cracks line the filthy concrete footpaths and rusted tram tracks, and weeds poke out from holes in the concrete",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: -4, z: 0 },
+                grid_coords: GridCoords { x: 17, y: -4, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -1101,7 +1116,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>||<reset>"),
                 description: "A road that looks to have been a major tram thoroughfare before the collapse. Cracks line the filthy concrete footpaths and rusted tram tracks, and weeds poke out from holes in the concrete",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: -3, z: 0 },
+                grid_coords: GridCoords { x: 17, y: -3, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -1124,7 +1139,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>||<reset>"),
                 description: "A road that looks to have been a major tram thoroughfare before the collapse. Cracks line the filthy concrete footpaths and rusted tram tracks, and weeds poke out from holes in the concrete",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: -2, z: 0 },
+                grid_coords: GridCoords { x: 17, y: -2, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -1147,7 +1162,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>##<reset>"),
                 description: "A dilapidated major tram thoroughfare intersects a narrower 2 lane each way road. Both have been rather poorly maintained. Potholes dot the ashphalt and weeds poke out from cracks in the concrete",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: -1, z: 0 },
+                grid_coords: GridCoords { x: 17, y: -1, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -1176,7 +1191,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 description: ansi!(
                     "A wide road (5 lanes each way) that has been rather poorly maintained. Potholes dot the ashphalt road, while cracks line the footpaths on either side"),
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: 0, z: 0 },
+                grid_coords: GridCoords { x: 17, y: 0, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -1200,7 +1215,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 description: ansi!(
                     "A road that looks to have been a major tram thoroughfare before the collapse. Cracks line the filthy concrete footpaths and rusted tram tracks, and weeds poke out from holes in the concrete"),
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: 1, z: 0 },
+                grid_coords: GridCoords { x: 17, y: 1, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -1223,7 +1238,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>||<reset>"),
                 description: "A road that looks to have been a major tram thoroughfare before the collapse. Cracks line the filthy concrete footpaths and rusted tram tracks, and weeds poke out from holes in the concrete",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: 2, z: 0 },
+                grid_coords: GridCoords { x: 17, y: 2, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -1246,7 +1261,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>##<reset>"),
                 description: "A dilapidated major tram thoroughfare intersects a slightly narrower 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt and weeds poke out from cracks in the concrete",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: 3, z: 0 },
+                grid_coords: GridCoords { x: 17, y: 3, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -1255,6 +1270,11 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                     Exit {
                         direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::WEST,
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
@@ -1269,7 +1289,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>||<reset>"),
                 description: "A road that looks to have been a major tram thoroughfare before the collapse. Cracks line the filthy concrete footpaths and rusted tram tracks, and weeds poke out from holes in the concrete",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: 4, z: 0 },
+                grid_coords: GridCoords { x: 17, y: 4, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -1292,7 +1312,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>||<reset>"),
                 description: "A road that looks to have been a major tram thoroughfare before the collapse. Cracks line the filthy concrete footpaths and rusted tram tracks, and weeds poke out from holes in the concrete",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: 5, z: 0 },
+                grid_coords: GridCoords { x: 17, y: 5, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -1315,7 +1335,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>||<reset>"),
                 description: "A road that looks to have been a major tram thoroughfare before the collapse. Cracks line the filthy concrete footpaths and rusted tram tracks, and weeds poke out from holes in the concrete",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: 6, z: 0 },
+                grid_coords: GridCoords { x: 17, y: 6, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -1338,7 +1358,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>##<reset>"),
                 description: "A dilapidated major tram thoroughfare intersects another wide 4-lane road. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: 7, z: 0 },
+                grid_coords: GridCoords { x: 17, y: 7, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -1347,6 +1367,11 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                     Exit {
                         direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::WEST,
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
@@ -1361,7 +1386,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>||<reset>"),
                 description: "A road that looks to have been a major tram thoroughfare before the collapse. Cracks line the filthy concrete footpaths and rusted tram tracks, and weeds poke out from holes in the concrete",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: 8, z: 0 },
+                grid_coords: GridCoords { x: 17, y: 8, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -1384,7 +1409,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>||<reset>"),
                 description: "A road that looks to have been a major tram thoroughfare before the collapse. Cracks line the filthy concrete footpaths and rusted tram tracks, and weeds poke out from holes in the concrete",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: 9, z: 0 },
+                grid_coords: GridCoords { x: 17, y: 9, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::NORTH,
@@ -1407,7 +1432,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>||<reset>"),
                 description: "A road that looks to have been a major tram thoroughfare before the collapse. Cracks line the filthy concrete footpaths and rusted tram tracks, and weeds poke out from holes in the concrete",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 13, y: 10, z: 0 },
+                grid_coords: GridCoords { x: 17, y: 10, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -1601,6 +1626,11 @@ pub fn room_list() -> &'static Vec<Room> {
                 grid_coords: GridCoords { x: 9, y: -5, z: 0 },
                 exits: vec!(
                     Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
                         direction: Direction::WEST,
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
@@ -1621,7 +1651,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A moderately wide road that is now overgrown and completely covered in weeds",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 6, y: -5, z: 0 },
+                grid_coords: GridCoords { x: 10, y: -5, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -1644,7 +1674,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A moderately wide road that is now overgrown and completely covered in weeds",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 7, y: -5, z: 0 },
+                grid_coords: GridCoords { x: 11, y: -5, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -1667,7 +1697,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A moderately wide road that is now overgrown and completely covered in weeds",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 8, y: -5, z: 0 },
+                grid_coords: GridCoords { x: 12, y: -5, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -1690,8 +1720,13 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>##<reset>"),
                 description: "A moderately wide road that is now overgrown and completely covered in weeds intersects a wide road stained from years of neglect",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 9, y: -5, z: 0 },
+                grid_coords: GridCoords { x: 13, y: -5, z: 0 },
                 exits: vec!(
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
                     Exit {
                         direction: Direction::WEST,
                         target: ExitTarget::UseGPS,
@@ -1713,7 +1748,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A moderately wide road that is now overgrown and completely covered in weeds",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 10, y: -5, z: 0 },
+                grid_coords: GridCoords { x: 14, y: -5, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -1736,7 +1771,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A moderately wide road that is now overgrown and completely covered in weeds",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 11, y: -5, z: 0 },
+                grid_coords: GridCoords { x: 15, y: -5, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -1759,7 +1794,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A moderately wide road that is now overgrown and completely covered in weeds",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 12, y: -5, z: 0 },
+                grid_coords: GridCoords { x: 16, y: -5, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -1957,6 +1992,16 @@ pub fn room_list() -> &'static Vec<Room> {
                 grid_coords: GridCoords { x: 9, y: -1, z: 0 },
                 exits: vec!(
                     Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
                         direction: Direction::WEST,
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
@@ -1977,7 +2022,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 6, y: -1, z: 0 },
+                grid_coords: GridCoords { x: 10, y: -1, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -2000,7 +2045,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 7, y: -1, z: 0 },
+                grid_coords: GridCoords { x: 11, y: -1, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -2023,7 +2068,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 8, y: -1, z: 0 },
+                grid_coords: GridCoords { x: 12, y: -1, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -2046,7 +2091,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>##<reset>"),
                 description: "A pot-holded two-lane each way road intersects a wide road stained from years of neglect",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 9, y: -1, z: 0 },
+                grid_coords: GridCoords { x: 13, y: -1, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -2079,7 +2124,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 10, y: -1, z: 0 },
+                grid_coords: GridCoords { x: 14, y: -1, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -2102,7 +2147,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 11, y: -1, z: 0 },
+                grid_coords: GridCoords { x: 15, y: -1, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -2125,7 +2170,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A two-lane each way road that has been rather poorly maintained. Potholes dot the ashphalt and cracks line the footpaths",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 12, y: -1, z: 0 },
+                grid_coords: GridCoords { x: 16, y: -1, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -2403,6 +2448,16 @@ pub fn room_list() -> &'static Vec<Room> {
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
                 ),
                 should_caption: false,
             },
@@ -2655,7 +2710,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 6, y: 3, z: 0 },
+                grid_coords: GridCoords { x: 10, y: 3, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -2678,7 +2733,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 7, y: 3, z: 0 },
+                grid_coords: GridCoords { x: 11, y: 3, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -2701,7 +2756,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 8, y: 3, z: 0 },
+                grid_coords: GridCoords { x: 12, y: 3, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -2724,7 +2779,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>##<reset>"),
                 description: "A pot-holded two-lane each way road intersects a wide road stained from years of neglect",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 9, y: 3, z: 0 },
+                grid_coords: GridCoords { x: 13, y: 3, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -2757,7 +2812,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 10, y: 3, z: 0 },
+                grid_coords: GridCoords { x: 14, y: 3, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -2780,7 +2835,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 11, y: 3, z: 0 },
+                grid_coords: GridCoords { x: 15, y: 3, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -2803,7 +2858,7 @@ pub fn room_list() -> &'static Vec<Room> {
                 short: ansi!("<yellow>==<reset>"),
                 description: "A 4-lane road with wide but heavily cracked concrete footpaths. Potholes dot the ashphalt",
                 description_less_explicit: None,
-                grid_coords: GridCoords { x: 12, y: 3, z: 0 },
+                grid_coords: GridCoords { x: 16, y: 3, z: 0 },
                 exits: vec!(
                     Exit {
                         direction: Direction::WEST,
@@ -2817,8 +2872,909 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
-            }
+            },
+            
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_10",
+                name: "Queen St - 10 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A fairly wide road where the surface has broken down but has been kept clear by regular foot traffic",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: -4, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_20",
+                name: "Queen St - 20 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A fairly wide road where the surface has broken down but has been kept clear by regular foot traffic",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: -3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_30",
+                name: "Queen St - 30 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A fairly wide road where the surface has broken down but has been kept clear by regular foot traffic",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: -2, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_40",
+                name: ansi!("Queen St - 40 block"),
+                short: ansi!("<yellow>||<reset>"),
+                description: ansi!(
+                    "A fairly wide road where the surface has broken down but has been kept clear by regular foot traffic"),
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: 0, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            }, 
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_50",
+                name: ansi!("Queen St - 50 block"),
+                short: ansi!("<yellow>||<reset>"),
+                description: ansi!(
+                    "A fairly wide road where the surface has broken down but has been kept clear by regular foot traffic"),
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: 1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            }, 
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_60",
+                name: "Queen St - 60 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A fairly wide road where the surface has broken down but has been kept clear by regular foot traffic",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: 2, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_70",
+                name: "Queen St - 70 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A fairly wide road where the surface has broken down but has been kept clear by regular foot traffic",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: 4, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_80",
+                name: "Queen St - 80 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A fairly wide road where the surface has broken down but has been kept clear by regular foot traffic",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: 5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_90",
+                name: "Queen St - 90 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A fairly wide road where the surface has broken down but has been kept clear by regular foot traffic",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: 6, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_collinsst",
+                name: "Queen St & Collins St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "A fairly wide road where the surface has broken down but has been kept clear by regular foot traffic intersects a wide 4-lane road. Potholes dot the ashphalt road, while cracks line the footpaths on either side",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_100",
+                name: "Queen St - 100 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A fairly wide road where the surface has broken down but has been kept clear by regular foot traffic",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: 8, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_110",
+                name: "Queen St - 110 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A fairly wide road where the surface has broken down but has been kept clear by regular foot traffic",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: 9, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_queenst_120",
+                name: "Queen St - 120 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A fairly wide road where the surface has broken down but has been kept clear by regular foot traffic",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 9, y: 10, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
 
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_collinsst_210",
+                name: "Collins St - 210 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with round muddy potholes marring the poorly maintained asphalt surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 2, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_collinsst_200",
+                name: "Collins St - 200 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with round muddy potholes marring the poorly maintained asphalt surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 3, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_collinsst_190",
+                name: "Collins St - 190 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with round muddy potholes marring the poorly maintained asphalt surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 4, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_collinsst_180",
+                name: "Collins St - 180 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with round muddy potholes marring the poorly maintained asphalt surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 6, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_collinsst_170",
+                name: "Collins St - 170 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with round muddy potholes marring the poorly maintained asphalt surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 7, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_collinsst_160",
+                name: "Collins St - 160 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with round muddy potholes marring the poorly maintained asphalt surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 8, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_collinsst_150",
+                name: "Collins St - 150 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with round muddy potholes marring the poorly maintained asphalt surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 10, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_collinsst_140",
+                name: "Collins St - 140 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with round muddy potholes marring the poorly maintained asphalt surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 11, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_collinsst_130",
+                name: "Collins St - 130 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with round muddy potholes marring the poorly maintained asphalt surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 12, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_collinsst",
+                name: "Elizabeth St & Collins St",
+                short: ansi!("<yellow>##<reset>"),
+                description: "A 4-lane road with round muddy potholes intersects a wide road stained from years of neglect",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 13, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_collinsst_120",
+                name: "Collins St - 120 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with round muddy potholes marring the poorly maintained asphalt surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 14, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_collinsst_110",
+                name: "Collins St - 110 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with round muddy potholes marring the poorly maintained asphalt surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 15, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_collinsst_100",
+                name: "Collins St - 100 block",
+                short: ansi!("<yellow>==<reset>"),
+                description: "A 4-lane road with round muddy potholes marring the poorly maintained asphalt surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 16, y: 7, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+
+            // New content marker
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_10",
+                name: "Elizabeth St - 10 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road stained from years of neglect. The road smells foul, and you can make out brown, white, red, and even grey stains, as well as the occasional slick from ancient oil spilled on the surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 13, y: -4, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_20",
+                name: "Elizabeth St - 20 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road stained from years of neglect. The road smells foul, and you can make out brown, white, red, and even grey stains, as well as the occasional slick from ancient oil spilled on the surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 13, y: -3, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_30",
+                name: "Elizabeth St - 30 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road stained from years of neglect. The road smells foul, and you can make out brown, white, red, and even grey stains, as well as the occasional slick from ancient oil spilled on the surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 13, y: -2, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_40",
+                name: ansi!("Elizabeth St - 40 block"),
+                short: ansi!("<yellow>||<reset>"),
+                description: ansi!(
+                    "A wide road stained from years of neglect. The road smells foul, and you can make out brown, white, red, and even grey stains, as well as the occasional slick from ancient oil spilled on the surface"),
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 13, y: 0, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            }, 
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_50",
+                name: ansi!("Elizabeth St - 50 block"),
+                short: ansi!("<yellow>||<reset>"),
+                description: ansi!(
+                    "A wide road stained from years of neglect. The road smells foul, and you can make out brown, white, red, and even grey stains, as well as the occasional slick from ancient oil spilled on the surface"),
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 13, y: 1, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            }, 
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_60",
+                name: "Elizabeth St - 60 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road stained from years of neglect. The road smells foul, and you can make out brown, white, red, and even grey stains, as well as the occasional slick from ancient oil spilled on the surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 13, y: 2, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_70",
+                name: "Elizabeth St - 70 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road stained from years of neglect. The road smells foul, and you can make out brown, white, red, and even grey stains, as well as the occasional slick from ancient oil spilled on the surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 13, y: 4, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_80",
+                name: "Elizabeth St - 80 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road stained from years of neglect. The road smells foul, and you can make out brown, white, red, and even grey stains, as well as the occasional slick from ancient oil spilled on the surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 13, y: 5, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_90",
+                name: "Elizabeth St - 90 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road stained from years of neglect. The road smells foul, and you can make out brown, white, red, and even grey stains, as well as the occasional slick from ancient oil spilled on the surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 13, y: 6, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_100",
+                name: "Elizabeth St - 100 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road stained from years of neglect. The road smells foul, and you can make out brown, white, red, and even grey stains, as well as the occasional slick from ancient oil spilled on the surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 13, y: 8, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_110",
+                name: "Elizabeth St - 110 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A wide road stained from years of neglect. The road smells foul, and you can make out brown, white, red, and even grey stains, as well as the occasional slick from ancient oil spilled on the surface",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 13, y: 9, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_elizabethst_120",
+                name: "Elizabeth St - 120 block",
+                short: ansi!("<yellow>||<reset>"),
+                description: "A fairly wide road where the surface has broken down but has been kept clear by regular foot traffic",
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 13, y: 10, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::NORTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                    Exit {
+                        direction: Direction::SOUTH,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: false,
+            },
         ).into_iter().collect())
 }
 
@@ -2897,8 +3853,8 @@ mod test {
             |a,b|
             a.grid_coords.cmp(&b.grid_coords)
                 .then(a.zone.cmp(&b.zone)));
-        let dups : Vec<Vec<(&'static str, &'static GridCoords, &'static str)>> =
-            room_list().iter()
+        let dups : Vec<Vec<(&'static str, &GridCoords, &'static str)>> =
+            roomlist.iter()
             .group_by(|x| (&x.grid_coords, x.zone))
             .into_iter()
             .map(|((coord, zone), rg)|

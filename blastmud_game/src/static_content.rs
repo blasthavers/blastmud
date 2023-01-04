@@ -86,7 +86,7 @@ mod test {
 
     #[test]
     fn no_duplicate_static_content() {
-            let mut registry = static_item_registry();
+        let mut registry = static_item_registry();
         registry.sort_unstable_by(|x, y| x.item_type.cmp(y.item_type));
     
         let duplicates: Vec<&'static str> =
