@@ -2,7 +2,6 @@ use serde::{Serialize, Deserialize};
 use serde_json::Value;
 use chrono::{DateTime, Utc};
 
-
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum TaskRecurrence {
     FixedDuration { seconds: u32 }
@@ -11,13 +10,18 @@ pub enum TaskRecurrence {
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 #[serde(tag="task_type", content="task_details")]
 pub enum TaskDetails {
-    RunQueuedCommand
+    RunQueuedCommand,
+    NPCSay {
+        npc_code: String,
+        say_code: String
+    }
 }
 impl TaskDetails {
     pub fn name(self: &Self) -> &'static str {
         use TaskDetails::*;
         match self {
-            RunQueuedCommand => "RunQueuedCommand"
+            RunQueuedCommand => "RunQueuedCommand",
+            NPCSay { .. } => "NPCSay",
         }
     }
 }

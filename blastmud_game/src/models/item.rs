@@ -107,6 +107,12 @@ pub enum Sex {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+pub enum ItemFlag {
+    NoSay
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+#[serde(default)]
 pub struct Item {
     pub item_code: String,
     pub item_type: String,
@@ -124,6 +130,7 @@ pub struct Item {
     pub total_skills: BTreeMap<SkillType, u16>,
     pub temporary_buffs: Vec<Buff>,
     pub pronouns: Pronouns,
+    pub flags: Vec<ItemFlag>,
     pub sex: Option<Sex>,
 }
 
@@ -162,6 +169,7 @@ impl Default for Item {
             total_skills: BTreeMap::new(),
             temporary_buffs: Vec::new(),
             pronouns: Pronouns::default_inanimate(),
+            flags: vec!(),
             sex: None
         }
     }

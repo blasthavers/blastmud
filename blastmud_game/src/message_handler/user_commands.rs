@@ -21,6 +21,7 @@ pub mod movement;
 pub mod parsing;
 mod quit;
 mod register;
+pub mod say;
 mod whisper;
 
 pub struct VerbContext<'l> {
@@ -100,8 +101,11 @@ static REGISTERED_COMMANDS: UserVerbRegistry = phf_map! {
     "look" => look::VERB,
     "read" => look::VERB,
     "lmap" => map::VERB,
+    "\'" => say::VERB,
+    "say" => say::VERB,
     "-" => whisper::VERB,
     "whisper" => whisper::VERB,
+    "tell" => whisper::VERB,
 };
 
 fn resolve_handler(ctx: &VerbContext, cmd: &str) -> Option<&'static UserVerbRef> {

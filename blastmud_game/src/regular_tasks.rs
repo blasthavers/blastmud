@@ -8,6 +8,7 @@ use once_cell::sync::OnceCell;
 use std::ops::AddAssign;
 use std::collections::BTreeMap;
 use chrono::Utc;
+use crate::static_content::npc;
 
 pub mod queued_command;
 
@@ -26,7 +27,8 @@ fn task_handler_registry() -> &'static BTreeMap<&'static str, &'static (dyn Task
         OnceCell::new();
     TASK_HANDLER_REGISTRY.get_or_init(
         || vec!(
-            ("RunQueuedCommand", queued_command::HANDLER.clone())
+            ("RunQueuedCommand", queued_command::HANDLER.clone()), 
+            ("NPCSay", npc::SAY_HANDLER.clone()),
         ).into_iter().collect()
     )
 }

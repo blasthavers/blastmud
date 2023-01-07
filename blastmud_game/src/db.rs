@@ -151,10 +151,28 @@ impl DBPool {
                 .collect()))
     }
     
+    pub async fn find_static_task_types(self: &Self) -> DResult<Box<BTreeSet<String>>> {
+        Ok(Box::new(
+            self
+                .get_conn().await?
+                .query("SELECT DISTINCT details->>'task_type' AS task_type \
+                        FROM tasks WHERE details->>'is_static' = 'true'", &[]).await?
+               .iter()
+                .map(|r| r.get("task_type"))
+                .collect()))
+    }
+    
     pub async fn delete_static_items_by_type(self: &Self, item_type: &str) -> DResult<()> {
         self.get_conn().await?.query(
             "DELETE FROM items WHERE details->>'is_static' = 'true' AND details->>'item_type' = {}",
             &[&item_type]).await?;
+        Ok(())
+    }
+    
+    pub async fn delete_static_tasks_by_type(self: &Self, task_type: &str) -> DResult<()> {
+        self.get_conn().await?.query(
+            "DELETE FROM tasks WHERE details->>'is_static' = 'true' AND details->>'task_type' = {}",
+            &[&task_type]).await?;
         Ok(())
     }
     
@@ -279,6 +297,29 @@ impl DBTrans {
         Ok(())
     }
 
+    pub async fn limited_update_static_task(self: &Self, task: &Task) -> DResult<()> {
+        let value = serde_json::to_value(task)?;
+        let obj_map = value.as_object()
+            .expect("Static task to be object in JSON");
+        let task_name: &(dyn ToSql + Sync) = &task.details.name();
+        let mut params: Vec<&(dyn ToSql + Sync)> = vec!(task_name, &task.meta.task_code);
+        let mut det_ex: String = "details".to_owned();
+        let mut var_id = 3;
+        // Only copy more permanent fields, others are supposed to change over time and shouldn't
+        // be reset on restart. We do reset failure count since the problem may be fixed.
+        for to_copy in ["recurrence", "consecutive_failure_count", "task_details"] {
+            det_ex = format!("jsonb_set({}, '{{{}}}', ${})", det_ex, to_copy, var_id);
+            params.push(obj_map.get(to_copy).unwrap_or(&Value::Null));
+            var_id += 1;
+        }
+        self.pg_trans()?.execute(
+            &("UPDATE tasks SET details = ".to_owned() + &det_ex +
+              " WHERE details->>'task_type' = $1 AND details->>'task_code' = $2"),
+            &params).await?;
+        Ok(())
+    }
+
+    
     pub async fn create_user(self: &Self, session: &ListenerSession, user_dat: &User) -> DResult<()> {
         self.pg_trans()?.execute("INSERT INTO users (\
               username, current_session, current_listener, details\
@@ -332,6 +373,19 @@ impl DBTrans {
                 .collect()))
     }
 
+    pub async fn find_static_tasks_by_type(self: &Self, task_type: &str) ->
+        DResult<Box<BTreeSet<String>>> {
+        Ok(Box::new(
+            self.pg_trans()?
+                .query("SELECT DISTINCT details->>'task_code' AS task_code FROM tasks WHERE \
+                        details->>'is_static' = 'true' AND \
+                        details->>'task_type' = $1", &[&task_type])
+                .await?
+                .into_iter()
+                .map(|v| v.get("task_code"))
+                .collect()))
+    }
+    
     pub async fn delete_static_items_by_code(self: &Self, item_type: &str,
                                              item_code: &str) -> DResult<()> {
         self.pg_trans()?.query(
@@ -342,6 +396,16 @@ impl DBTrans {
         Ok(())
     }
 
+    pub async fn delete_static_tasks_by_code(self: &Self, task_type: &str,
+                                             task_code: &str) -> DResult<()> {
+        self.pg_trans()?.query(
+            "DELETE FROM task WHERE details->>'is_static' = 'true' AND \
+               details->>'task_type' = $1 AND \
+               details->>'task_code' = $2",
+            &[&task_type, &task_code]).await?;
+        Ok(())
+    }
+    
     pub async fn find_item_by_type_code(self: &Self, item_type: &str, item_code: &str) ->
         DResult<Option<Arc<Item>>> {
         if let Some(item) = self.pg_trans()?.query_opt(
@@ -464,7 +528,7 @@ impl DBTrans {
         match self.pg_trans()?.query_opt(
             "SELECT details FROM tasks WHERE \
              CAST(details->>'next_scheduled' AS TIMESTAMPTZ) <= now() \
-             ORDER BY details->>'next_scheduled'", &[]
+             ORDER BY details->>'next_scheduled' ASC LIMIT 1", &[]
         ).await? {
             None => Ok(None),
             Some(row) => Ok(serde_json::from_value(row.get("details"))?)

@@ -126,6 +126,7 @@ dependencies = [
  "once_cell",
  "ouroboros",
  "phf",
+ "rand",
  "ring",
  "serde",
  "serde_json",
