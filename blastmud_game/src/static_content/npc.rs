@@ -57,7 +57,20 @@ pub fn npc_list() -> &'static Vec<NPC> {
     static NPC_LIST: OnceCell<Vec<NPC>> = OnceCell::new();
     NPC_LIST.get_or_init(
         ||  {
-            let melbs_citizen_stdsay = NPCSayInfo { say_code: "babble", frequency_secs: 60, talk_type: FromFixedList(vec!((false, "I'm so sick of being cloned")))};
+            let melbs_citizen_stdsay = NPCSayInfo {
+                say_code: "babble",
+                frequency_secs: 60,
+                talk_type: FromFixedList(vec!(
+                    (false, "I'm so sick of being cloned."),
+                    (false, "I hope I don't die again today."),
+                    (false, "I wish the so-called king would do something about the damned zombies everywhere."),
+                    (true, "I earn so many credits making babies for the body factory - it literally pays my bills."),
+                    (false, "I know people hated the empire, but I kind of wish it was still intact - it was a lot better than what we have now."),
+                    (false, "I wish there wasn't so much radiation outside of Melbs CBD."),
+                    (false, "I heard about a guy who went to a special place somewhere around here, and there was a machine that enhanced his wristpad and gave him basically superpowers."),
+                    (false, "The damn vampire movement... they are all so sneaky, and I never know when they are going to come for my blood."),
+                ))
+            };
             vec!(
               NPC {
                   code: "repro_xv_chargen_statbot",
