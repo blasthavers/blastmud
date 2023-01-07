@@ -3,7 +3,7 @@ use super::{VerbContext, UserVerb, UserVerbRef, UResult, UserError, user_error,
 use async_trait::async_trait;
 use ansi::{ansi, flow_around, word_wrap};
 use crate::db::ItemSearchParams;
-use crate::models::{item::{Item, LocationActionType, Subattack}};
+use crate::models::{item::{Item, LocationActionType, Subattack, ItemFlag}};
 use crate::static_content::room::{self, Direction};
 use itertools::Itertools;
 use std::sync::Arc;
@@ -75,6 +75,9 @@ pub async fn describe_room(ctx: &VerbContext<'_>, item: &Item,
 }
 
 async fn list_item_contents<'l>(ctx: &'l VerbContext<'_>, item: &'l Item) -> UResult<String> {
+    if item.flags.contains(&ItemFlag::NoSeeContents) {
+        return Ok(" It is too foggy to see who or what else is here.".to_owned());
+    }
     let mut buf = String::new();
     let mut items = ctx.trans.find_items_by_location(&format!("{}/{}",
                                                           item.item_type, item.item_code)).await?;

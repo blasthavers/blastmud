@@ -108,7 +108,8 @@ pub enum Sex {
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum ItemFlag {
-    NoSay
+    NoSay,
+    NoSeeContents
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]

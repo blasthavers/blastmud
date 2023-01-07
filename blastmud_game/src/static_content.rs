@@ -181,8 +181,8 @@ mod test {
 
         for type_group in registry.iter() {
             let iterator : Box<dyn Iterator<Item = StaticTask>> = (type_group.things)();
-            let duplicates: Vec<&'static str> = iterator
-                .group_by(|x| x.task_code)
+            let duplicates: Vec<String> = iterator
+                .group_by(|x| x.task_code.clone())
                 .into_iter()
                 .filter_map(|(k, v)| if v.count() <= 1 { None } else { Some(k) })
                 .collect();

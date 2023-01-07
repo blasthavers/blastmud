@@ -7,7 +7,7 @@ use serde::{Serialize, Deserialize};
 use crate::message_handler::user_commands::{
     UResult, VerbContext
 };
-use crate::models::item::Item;
+use crate::models::item::{Item, ItemFlag};
 
 pub struct Zone {
     pub code: &'static str,
@@ -150,7 +150,27 @@ pub struct Room {
     pub description: &'static str,
     pub description_less_explicit: Option<&'static str>,
     pub exits: Vec<Exit>,
-    pub should_caption: bool
+    pub should_caption: bool,
+    pub item_flags: Vec<ItemFlag>
+}
+
+impl Default for Room {
+    fn default() -> Self {
+        Self {
+            zone: "default",
+            secondary_zones: vec!(),
+            code: "default",
+            name: "default",
+            short: "DF",
+            grid_coords: GridCoords { x: 0, y: 0, z: 0 },
+            description: "default",
+            description_less_explicit: None,
+            exits: vec!(),
+            should_caption: true,
+            item_flags: vec!(),
+        }
+    }
+    
 }
 
 static STATIC_ROOM_LIST: OnceCell<Vec<Room>> = OnceCell::new();
@@ -159,7 +179,6 @@ pub fn room_list() -> &'static Vec<Room> {
         || vec!(
             Room {
                 zone: "repro_xv",
-                secondary_zones: vec!(),
                 code: "repro_xv_chargen",
                 name: ansi!("Choice Room"),
                 short: ansi!("<bgwhite><green>CR<reset>"),
@@ -176,18 +195,17 @@ pub fn room_list() -> &'static Vec<Room> {
                     14 points and create your body.\"<reset>\n\
                     [Try <bold>-statbot hi<reset>, to send hi to statbot - the - means \
                     to whisper to a particular person in the room]"),
-                description_less_explicit: None,
                 grid_coords: GridCoords { x: 0, y: 0, z: -1 },
                 exits: vec!(Exit {
                     direction: Direction::EAST,
                     target: ExitTarget::UseGPS,
                     exit_type: ExitType::Blocked(&super::npc::statbot::ChoiceRoomBlocker),
                 }),
-                should_caption: true
+                should_caption: true,
+                ..Default::default()
             },
             Room {
                 zone: "repro_xv",
-                secondary_zones: vec!(),
                 code: "repro_xv_updates",
                 name: ansi!("Update Centre"),
                 short: ansi!("<bgwhite><green>UC<reset>"),
@@ -196,14 +214,14 @@ pub fn room_list() -> &'static Vec<Room> {
                     get up to speed on what has happened in the world since their memory implant was \
                     created. A one-way opens to the east - you have a feeling that once you go through, \
                     there will be no coming back in here. <bold>[Hint: Try reading the posters here.]<reset>"),
-                description_less_explicit: None,
                 grid_coords: GridCoords { x: 1, y: 0, z: -1 },
                 exits: vec!(Exit {
                     direction: Direction::EAST,
                     target: ExitTarget::UseGPS,
                     exit_type: ExitType::Free,
                 }),
-                should_caption: true
+                should_caption: true,
+                ..Default::default()
             },
             Room {
                 zone: "repro_xv",
@@ -217,14 +235,14 @@ pub fn room_list() -> &'static Vec<Room> {
                     Being here makes you realise you aren't exactly alive right now... you \
                     have no body. But you sense you could go <bold>up<reset> and attach \
                     your memories to a body matching your current stats"),
-                description_less_explicit: None,
                 grid_coords: GridCoords { x: 2, y: 0, z: -1 },
                 exits: vec!(Exit {
                     direction: Direction::UP,
                     target: ExitTarget::UseGPS,
                     exit_type: ExitType::Free
                 }),
-                should_caption: true
+                should_caption: true,
+                ..Default::default()
             },
             Room {
                 zone: "repro_xv",
@@ -245,7 +263,6 @@ pub fn room_list() -> &'static Vec<Room> {
                     ReproLabs XV stuck to the wall behind it. A pipe down to into the ground \
                     opens up here, but the airflow is so strong, it looks like it is out \
                     only - it seems to be how newly re-cloned bodies get back into the world"),
-                description_less_explicit: None,
                 grid_coords: GridCoords { x: 2, y: 0, z: 0 },
                 exits: vec!(
                     Exit {
@@ -253,7 +270,8 @@ pub fn room_list() -> &'static Vec<Room> {
                         target: ExitTarget::Custom("room/melbs_kingst_50"),
                         exit_type: ExitType::Free
                     }),
-                should_caption: true
+                should_caption: true,
+                ..Default::default()
             },
 
 
@@ -278,7 +296,8 @@ pub fn room_list() -> &'static Vec<Room> {
                         exit_type: ExitType::Free
                     },
                 ),
-                should_caption: false,
+                should_caption: false, 
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -302,6 +321,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -325,6 +345,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -348,6 +369,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -376,6 +398,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -398,8 +421,35 @@ pub fn room_list() -> &'static Vec<Room> {
                         target: ExitTarget::UseGPS,
                         exit_type: ExitType::Free
                     },
+                    Exit {
+                        direction: Direction::EAST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
                 ),
                 should_caption: false,
+                ..Default::default()
+            }, 
+            Room {
+                zone: "melbs",
+                secondary_zones: vec!(),
+                code: "melbs_homelessshelter",
+                name: ansi!("Homeless Shelter"),
+                short: ansi!("<bgwhite><red>HS<reset>"),
+                description: ansi!(
+                    "A spartan room with row after row of plain beds. A thick mist from a fog machine means you can't see or hear much going on here, and no one can attack anyone. It looks like a safe place to log off if you have no better choice"),
+                description_less_explicit: None,
+                grid_coords: GridCoords { x: 2, y: 0, z: 0 },
+                exits: vec!(
+                    Exit {
+                        direction: Direction::WEST,
+                        target: ExitTarget::UseGPS,
+                        exit_type: ExitType::Free
+                    },
+                ),
+                should_caption: true,
+                item_flags: vec!(ItemFlag::NoSay, ItemFlag::NoSeeContents),
+                ..Default::default()
             }, 
             Room {
                 zone: "melbs",
@@ -436,6 +486,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             }, 
             Room {
                 zone: "melbs",
@@ -459,6 +510,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -487,6 +539,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -510,6 +563,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -533,6 +587,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -556,6 +611,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -584,6 +640,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -607,6 +664,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -630,6 +688,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -653,6 +712,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -676,6 +736,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
 
             Room {
@@ -700,6 +761,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -723,6 +785,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -746,6 +809,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -774,6 +838,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -797,6 +862,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -820,6 +886,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -843,6 +910,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -871,6 +939,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -894,6 +963,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -917,6 +987,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -940,6 +1011,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -968,6 +1040,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -991,6 +1064,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1014,6 +1088,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1037,6 +1112,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1060,6 +1136,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
 
             Room {
@@ -1084,6 +1161,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1107,6 +1185,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1130,6 +1209,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1153,6 +1233,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1181,6 +1262,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1205,6 +1287,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             }, 
             Room {
                 zone: "melbs",
@@ -1229,6 +1312,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             }, 
             Room {
                 zone: "melbs",
@@ -1252,6 +1336,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1280,6 +1365,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1303,6 +1389,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1326,6 +1413,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1349,6 +1437,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1377,6 +1466,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1400,6 +1490,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1423,6 +1514,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1446,6 +1538,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
 
             Room {
@@ -1470,6 +1563,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1493,6 +1587,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1516,6 +1611,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1544,6 +1640,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             
             Room {
@@ -1568,6 +1665,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1591,6 +1689,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1614,6 +1713,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1642,6 +1742,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1665,6 +1766,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1688,6 +1790,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1711,6 +1814,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1739,6 +1843,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1762,6 +1867,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1785,6 +1891,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1808,6 +1915,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
 
             Room {
@@ -1832,6 +1940,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1855,6 +1964,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1878,6 +1988,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1911,6 +2022,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1934,6 +2046,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1957,6 +2070,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -1980,6 +2094,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2013,6 +2128,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2036,6 +2152,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2059,6 +2176,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2082,6 +2200,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2115,6 +2234,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2138,6 +2258,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2161,6 +2282,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2184,6 +2306,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             
             Room {
@@ -2208,6 +2331,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2231,6 +2355,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2254,6 +2379,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2278,6 +2404,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             }, 
             Room {
                 zone: "melbs",
@@ -2302,6 +2429,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             }, 
             Room {
                 zone: "melbs",
@@ -2325,6 +2453,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2358,6 +2487,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2381,6 +2511,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2404,6 +2535,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2427,6 +2559,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2460,6 +2593,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2483,6 +2617,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2506,6 +2641,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2529,6 +2665,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
 
             Room {
@@ -2553,6 +2690,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2576,6 +2714,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2599,6 +2738,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2622,6 +2762,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2645,6 +2786,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2668,6 +2810,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2701,6 +2844,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2724,6 +2868,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2747,6 +2892,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2770,6 +2916,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2803,6 +2950,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2826,6 +2974,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2849,6 +2998,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2872,6 +3022,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             
             Room {
@@ -2896,6 +3047,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2919,6 +3071,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2942,6 +3095,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -2966,6 +3120,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             }, 
             Room {
                 zone: "melbs",
@@ -2990,6 +3145,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             }, 
             Room {
                 zone: "melbs",
@@ -3013,6 +3169,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3036,6 +3193,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3059,6 +3217,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3082,6 +3241,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3115,6 +3275,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3138,6 +3299,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3161,6 +3323,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3184,6 +3347,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
 
             Room {
@@ -3208,6 +3372,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3231,6 +3396,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3254,6 +3420,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3277,6 +3444,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3300,6 +3468,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3323,6 +3492,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3346,6 +3516,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3369,6 +3540,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3392,6 +3564,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3425,6 +3598,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3448,6 +3622,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3471,6 +3646,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3494,6 +3670,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
 
             // New content marker
@@ -3519,6 +3696,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3542,6 +3720,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3565,6 +3744,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3589,6 +3769,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             }, 
             Room {
                 zone: "melbs",
@@ -3613,6 +3794,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             }, 
             Room {
                 zone: "melbs",
@@ -3636,6 +3818,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3659,6 +3842,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3682,6 +3866,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3705,6 +3890,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3728,6 +3914,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3751,6 +3938,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
             Room {
                 zone: "melbs",
@@ -3774,6 +3962,7 @@ pub fn room_list() -> &'static Vec<Room> {
                     },
                 ),
                 should_caption: false,
+                ..Default::default()
             },
         ).into_iter().collect())
 }
@@ -3808,6 +3997,7 @@ pub fn room_static_items() -> Box<dyn Iterator<Item = StaticItem>> {
             details_less_explicit: r.description_less_explicit.map(|d|d.to_owned()),
             location: format!("zone/{}", r.zone),
             is_static: true,
+            flags: r.item_flags.clone(),
             ..Item::default()
         })
     }))

@@ -285,7 +285,7 @@ impl DBTrans {
         // Only copy more permanent fields, others are supposed to change over time and shouldn't
         // be reset on restart.
         for to_copy in ["display", "display_less_explicit", "details", "details_less_explicit",
-                        "total_xp", "total_stats", "total_skills", "pronouns"] {
+                        "total_xp", "total_stats", "total_skills", "pronouns", "flags"] {
             det_ex = format!("jsonb_set({}, '{{{}}}', ${})", det_ex, to_copy, var_id);
             params.push(obj_map.get(to_copy).unwrap_or(&Value::Null));
             var_id += 1;
