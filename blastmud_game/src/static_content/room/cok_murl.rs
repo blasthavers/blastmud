@@ -83,7 +83,7 @@ pub fn room_list() -> Vec<Room> {
             should_caption: true,
             ..Default::default()
         },
-        
+
         // Commercial
         Room {
             zone: "cok_murl",
